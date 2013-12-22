@@ -1,4 +1,5 @@
 # Mincer
+[![Build Status](https://travis-ci.org/spilin/mincer.png)](https://travis-ci.org/spilin/mincer)
 
 TODO: Write a gem description
 

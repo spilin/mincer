@@ -1,0 +1,8 @@
+language: ruby
+rvm:
+  - 2.0.0
+  - 1.9.3
+  - ruby-head
+
+before_script:
+  - psql -c 'create database mincer;' -U postgres

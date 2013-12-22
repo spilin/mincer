@@ -28,5 +28,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'kaminari'
   spec.add_development_dependency 'will_paginate'
   spec.add_development_dependency 'textacular'
-  spec.add_development_dependency 'simplecov'
 end

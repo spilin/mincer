@@ -10,5 +10,7 @@ before_script:
 
 addons:
   postgresql: "9.3"
+  code_climate:
+    repo_token: c4c8988b92d1a65f4a986d81a870b80fccb91f7c65d685fd21d914edfc85a949
 
 script: bundle exec rspec spec

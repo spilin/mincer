@@ -1,5 +1,6 @@
 # Mincer
 [![Build Status](https://travis-ci.org/spilin/mincer.png)](https://travis-ci.org/spilin/mincer)
+[![Code Climate](https://codeclimate.com/repos/52b775836956801ba7000bdb/badges/ec5d5862e4b89d10695c/gpa.png)](https://codeclimate.com/repos/52b775836956801ba7000bdb/feed)
 
 TODO: Write a gem description
 

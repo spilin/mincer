@@ -6,6 +6,9 @@ rvm:
 
 before_script:
   - psql -c 'create database mincer;' -U postgres
-  - psql -c '\c mincer; CREATE EXTENSION IF NOT EXISTS pgcrypto;' -U postgres
+  - psql -d mincer -c 'CREATE EXTENSION IF NOT EXISTS pgcrypto;' -U postgres
+
+addons:
+  postgresql: "9.3"
 
 script: bundle exec rspec spec

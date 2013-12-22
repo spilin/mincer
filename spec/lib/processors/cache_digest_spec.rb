@@ -3,10 +3,7 @@ require 'spec_helper'
 describe ::Mincer::Processors::CacheDigest do
   context 'when postgres used' do
     before do
-      config = YAML.load_file File.expand_path(File.dirname(__FILE__) + '../../../database.yml')
-      ActiveRecord::Base.establish_connection config.merge(:adapter => :postgresql)
-      ActiveRecord::Base.connection.execute('DROP TABLE IF EXISTS active_record_models')
-      ActiveRecord::Base.connection.execute('CREATE TABLE IF NOT EXISTS active_record_models (id SERIAL PRIMARY KEY, text TEXT)')
+      setup_basic_postgres_table
       class ActiveRecordModel < ActiveRecord::Base
       end
       ActiveRecordModel.create!(text: 'Test1')

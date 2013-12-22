@@ -13,7 +13,7 @@ module Mincer
       end
 
       def sort_attr
-        (@mincer.allowed_sort_attributes.include?(@args['sort']) && @args['sort']) || @mincer.default_sort_attribute
+        (@mincer.allowed_sort_attributes.include?(@args['sort']) && @args['sort']) || @mincer.send(:default_sort_attribute)
       end
 
       def order_attr

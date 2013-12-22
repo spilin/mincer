@@ -6,3 +6,5 @@ rvm:
 
 before_script:
   - psql -c 'create database mincer;' -U postgres
+
+script: bundle exec rspec spec

@@ -5,11 +5,11 @@
 
 Mincer is an ActiveRecord::Relation wrapper that applies usefull features to your queries. It can:
 
-1. Paginate
-2. Sort
-3. Search
-4. Dump to Json(Using postgres >= 9.2)
-5. Generate digest(usefull for caching)
+[Paginate](#pagination)
+[Sort](#sort)
+[Search](#search)
+[Dump to Json(Using postgres >= 9.2)](#json)
+[Generate digest(usefull for caching)](#digest)
 
 
 ## Installation
@@ -65,6 +65,7 @@ Lets create class EmployeesListQuerie class that will inherit from Mincer::Base,
 
 Now lets's look what more can we do with this object
 
+<a name="pagination"/>
 ### Pagination
 Mincer supports `kaminari` and `will_paginate`. In order to use pagination you need to include one of them 
 to your `Gemfile`. Example of using pagination
@@ -89,6 +90,7 @@ To disable pagination you can use class method `skip_pagination!`:
         end
     end
 
+<a name="sort"/>
 ### Sorting
 
 Example of using sorting:
@@ -168,6 +170,7 @@ Example of usage in HAML:
 In this example `li` will receive `class="sorted order_down"` or `class="sorted order_up"` if this attribue was used for search.
 Generated url will be enchanced with `sort` and `order` attributes.
 
+<a name="search"/>
 ### Search
 
 Currently Mincer uses [Textacular](https://github.com/textacular/textacular) for search. This sets alot of restrictions: 
@@ -182,13 +185,65 @@ Example of usage:
 This will use `simple_search`, and if it will return no entries Mincer will run `fuzzy_search`. For more details on what
 is the difference between them, plese look refer to `textacular` github [page](https://github.com/textacular/textacular).
 
+<a name="json"/>
+### JSON generation
 
+Mincer allowes you to dump query result to JSON using [Postgres JSON Functions](http://www.postgresql.org/docs/9.3/static/functions-json.html)
+Didn't had time to do benchmarks - but its' extremely fast.
 
-          
+Pros: 
+
+1. Speed
+2. No extra dependencies(you don't need any other JSON generators)
+
+Cons:
+
+1. Works only with postgres version >= 9.2
+2. If you are using ruby methods to generate some fields - you won't be able to use them in Mincer objects(Carrierwave image_urls, resource urls). You will have to duplicate logic inside postgres select query.
+
+To dump query result to json string you have to call `to_json` on Mincer object:
+
+    EmployeesListQuerie.new(Employee).to_json
     
+In our example it will return something like this 
 
+    "[{\"id\":1,\"employee_name\":\"John Smith\",\"company_name\":\"Microsoft\"},{\"id\":2,\"employee_name\":\"Jane Smith\",\"company_name\":\"37 Signals\"}]"
+    
+In addition you can pass option `root` to `to_json` method if you need to include root to json string:
+    
+    EmployeesListQuerie.new(Employee).to_json(root: 'employees')
+    # returns
+    "{\"employees\":[{\"id\":1,\"employee_name\":\"John Smith\",\"company_name\":\"Microsoft\"},{\"id\":2,\"employee_name\":\"Jane Smith\",\"company_name\":\"37 Signals\"}]}"
 
+<a name="digest"/> 
+### Digest
 
+Digest is very usefull for cache invalidation on your views when you are using custom queries. We will modify a bit example:
+
+    class EmployeesListQuerie < Mincer::Base
+        digest! %w{employee_updated_at company_updated_at}
+    
+        def build_query(relation, args)
+            custom_select = <<-SQL
+                employees.id, 
+                employees.full_name as employee_name, 
+                companies.name as company_name,
+                employees.updated_at as employee_updated_at, 
+                companies.updated_at as company_updated_at
+            SQL
+            relation.joins(:company).select(custom_select)
+        end
+    end
+
+In this example we will use 2 updated_at timestamps to generate digest. Whenever one of them will change - digest will change also. To get digest you should use method `digest` on Mincer model
+
+    EmployeesListQuerie.new(Employee).digest # "\\x20e93b4dc5e029130f3d60d697137934"
+    
+To generate digest you need to install extension 'pgcrypto'. If you use Rails, please use migration for that
+    
+    enable_extension 'pgcrypto'
+    
+or run `CREATE EXTENSION IF NOT EXISTS pgcrypto;`
 
 
 ## TODO

@@ -27,6 +27,7 @@ Or install it yourself as:
 
 ## Usage
 Lets assume we have 2 models
+
     class Employee < ActiveRecord::Base
         belongs_to :company
     end
@@ -64,7 +65,7 @@ Lets create class EmployeesListQuerie class that will inherit from Mincer::Base,
 Now lets's look what more can we do with this object
 
 ### Pagination
-Micner supports `kaminari` and `will_paginate`. In order to use pagination you need to include one of them 
+Mincer supports `kaminari` and `will_paginate`. In order to use pagination you need to include one of them 
 to your `Gemfile`. Example of using pagination
 
     employees = EmployeesListQuerie.new(Employee, {'page' => 2, 'per_page' => 10})
@@ -87,9 +88,88 @@ To disable pagination you can use class method `skip_pagination!`:
         end
     end
 
+### Sorting
 
+Example of using sorting:
 
+    employees = EmployeesListQuerie.new(Employee, {'sort' => 'employee_name', 'order' => 'DESC'})
+    
+By default all Mincer objects will sort by attribute `id` and order `ASC`. To change defaults you can override 
+them like this
 
+    class EmployeesListQuerie < Mincer::Base
+        # method should always return relation
+        def build_query(relation, args)
+            custom_select = <<-SQL
+                employees.id, 
+                employees.full_name as employee_name, 
+                companies.name as company_name
+            SQL
+            relation.joins(:company).select(custom_select)
+        end
+        
+      def default_sort_attribute
+        'employee_name'
+      end
+
+      def default_sort_order
+        'DESC'
+      end
+    end    
+    
+To disable sorting use class method `skip_sorting!` like this:
+
+    class EmployeesListQuerie < Mincer::Base
+        skip_sorting!
+        
+        # method should always return relation
+        def build_query(relation, args)
+            custom_select = <<-SQL
+                employees.id, 
+                employees.full_name as employee_name, 
+                companies.name as company_name
+            SQL
+            relation.joins(:company).select(custom_select)
+        end
+    end
+
+Mincer will validate `sort` and `order` params and will not allow to sort by attributes that do not exist.
+Default white list consists of all atttributes from original scope, in our example `Employee.attribute_name`.
+You can expand the list overriding `allowed_sort_attributes` list like this:
+
+    def allowed_sort_attributes
+        super + %w{employee_name company_name}
+    end
+This will allow to sort by all Employee attributes + `employee_name` and `company_name`
+
+Or restrict like this:
+
+    def allowed_sort_attributes
+        %w{employee_name}
+    end
+in this example sorting allowed only by `employee_name`.
+
+#### ActionView
+
+If you are using Rails or bare ActionView there are few helper methods at your disposal to help generating links
+for sorting. Currently there are 2 methods available: `sort_url_for` and `sort_class_for`.
+
+Example of usage in HAML:
+    
+    %ul
+        %li{ :class => (sort_class_for employees, 'id') }
+            = link_to 'ID', sort_url_for(employees, 'id')
+        %li{ :class => (sort_class_for employees, 'employee_name') }
+            = link_to 'Employee', sort_url_for(employees, 'employee_name')
+        %li{ :class => (sort_class_for employees, 'company_name') }
+            = link_to 'Company', sort_url_for(employees, 'company_name')
+      
+In this example `li` will receive `class="sorted order_down"` or `class="sorted order_up"` if this attribue was used for search. TODO: Make classses configurable.
+Generated url will be enchanced with `sort` and `order` attributes.
+
+          
+          
+    
 
 
 

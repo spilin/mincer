@@ -5,11 +5,11 @@
 
 Mincer is an ActiveRecord::Relation wrapper that applies usefull features to your queries. It can:
 
-[Paginate](#pagination)
-[Sort](#sort)
-[Search](#search)
-[Dump to Json(Using postgres >= 9.2)](#json)
-[Generate digest(usefull for caching)](#digest)
+[Paginate](#pagination)     
+[Sort](#sort)   
+[Search](#search)   
+[Dump to Json(Using postgres >= 9.2)](#json)    
+[Generate digest(usefull for caching)](#digest) 
 
 
 ## Installation
@@ -62,12 +62,11 @@ Lets create class EmployeesListQuerie class that will inherit from Mincer::Base,
     <% end %>
     
 
-
 Now lets's look what more can we do with this object
 
 <a name="pagination"/>
 ### Pagination
-Mincer supports `kaminari` and `will_paginate`. In order to use pagination you need to include one of them 
+Mincer supports [kaminari](https://github.com/amatsuda/kaminari) and [will_paginate](https://github.com/mislav/will_paginate). In order to use pagination you need to include one of them 
 to your `Gemfile`. Example of using pagination
 
     employees = EmployeesListQuerie.new(Employee, {'page' => 2, 'per_page' => 10})
@@ -247,10 +246,11 @@ or run `CREATE EXTENSION IF NOT EXISTS pgcrypto;`
 
 
 ## TODO
+
 1. Create general configuration for Mincer that would allow:
-..1. Changing sort html classes
-..2. Changing default arguments(sort, order, pattern, page, per_page..)
-..3. Disabling some processors for all Mincer objects
+    1. Changing sort html classes
+    2. Changing default arguments(sort, order, pattern, page, per_page..)
+    3. Disabling some processors for all Mincer objects
 2. Create rails generators.
 
 

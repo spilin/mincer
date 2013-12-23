@@ -4,6 +4,7 @@
 [![Gem Version](https://badge.fury.io/rb/mincer.png)](http://badge.fury.io/rb/mincer)
 
 Mincer is an ActiveRecord::Relation wrapper that applies usefull features to your queries. It can:
+
 1. Paginate
 2. Sort
 3. Search
@@ -164,10 +165,25 @@ Example of usage in HAML:
         %li{ :class => (sort_class_for employees, 'company_name') }
             = link_to 'Company', sort_url_for(employees, 'company_name')
       
-In this example `li` will receive `class="sorted order_down"` or `class="sorted order_up"` if this attribue was used for search. TODO: Make classses configurable.
+In this example `li` will receive `class="sorted order_down"` or `class="sorted order_up"` if this attribue was used for search.
 Generated url will be enchanced with `sort` and `order` attributes.
 
-          
+### Search
+
+Currently Mincer uses [Textacular](https://github.com/textacular/textacular) for search. This sets alot of restrictions: 
+1. Works only with postgres
+2. You have to include `textacular` to your Gemfile
+3. You have to install postgres extension that [Textacular](https://github.com/textacular/textacular) uses for searching.
+
+Example of usage:
+
+    employees = EmployeesListQuerie.new(Employee, {'pattern' => 'whatever'})
+
+This will use `simple_search`, and if it will return no entries Mincer will run `fuzzy_search`. For more details on what
+is the difference between them, plese look refer to `textacular` github [page](https://github.com/textacular/textacular).
+
+
+
           
     
 
@@ -175,8 +191,12 @@ Generated url will be enchanced with `sort` and `order` attributes.
 
 
 
-
-
+## TODO
+1. Create general configuration for Mincer that would allow:
+..1. Changing sort html classes
+..2. Changing default arguments(sort, order, pattern, page, per_page..)
+..3. Disabling some processors for all Mincer objects
+2. Create rails generators.
 
 
 ## Contributing

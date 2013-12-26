@@ -37,9 +37,9 @@ Lets assume we have 2 models
         has_many :employees
     end
     
-Lets create class EmployeesListQuerie class that will inherit from Mincer::Base, and instantiate it
+Lets create class EmployeesListQuery class that will inherit from Mincer::Base, and instantiate it
 
-    class EmployeesListQuerie < Mincer::Base
+    class EmployeesListQuery < Mincer::Base
         # method should always return relation
         def build_query(relation, args)
             custom_select = <<-SQL
@@ -51,7 +51,7 @@ Lets create class EmployeesListQuerie class that will inherit from Mincer::Base,
         end
     end
     
-    employees = EmployeesListQuerie.new(Employee)
+    employees = EmployeesListQuery.new(Employee)
 
 `employees` will delegate all methods, that it can't find on itself, to relation objects. This means you can use
 `employess` as you would use any ActiveRecord::Relation object:
@@ -69,13 +69,13 @@ Now lets's look what more can we do with this object
 Mincer supports [kaminari](https://github.com/amatsuda/kaminari) and [will_paginate](https://github.com/mislav/will_paginate). In order to use pagination you need to include one of them 
 to your `Gemfile`. Example of using pagination
 
-    employees = EmployeesListQuerie.new(Employee, {'page' => 2, 'per_page' => 10})
+    employees = EmployeesListQuery.new(Employee, {'page' => 2, 'per_page' => 10})
     
 By default all `Micner` objects will use pagination, even if no arguments are passed. To set default values for pagination please refer to `kaminari` or `will_paginate` documentation.
 
 To disable pagination you can use class method `skip_pagination!`:
 
-    class EmployeesListQuerie < Mincer::Base
+    class EmployeesListQuery < Mincer::Base
         skip_pagination!
         
         # method should always return relation
@@ -94,12 +94,12 @@ To disable pagination you can use class method `skip_pagination!`:
 
 Example of using sorting:
 
-    employees = EmployeesListQuerie.new(Employee, {'sort' => 'employee_name', 'order' => 'DESC'})
+    employees = EmployeesListQuery.new(Employee, {'sort' => 'employee_name', 'order' => 'DESC'})
     
 By default all Mincer objects will sort by attribute `id` and order `ASC`. To change defaults you can override 
 them like this
 
-    class EmployeesListQuerie < Mincer::Base
+    class EmployeesListQuery < Mincer::Base
         # method should always return relation
         def build_query(relation, args)
             custom_select = <<-SQL
@@ -121,7 +121,7 @@ them like this
     
 To disable sorting use class method `skip_sorting!` like this:
 
-    class EmployeesListQuerie < Mincer::Base
+    class EmployeesListQuery < Mincer::Base
         skip_sorting!
         
         # method should always return relation
@@ -179,7 +179,7 @@ Currently Mincer uses [Textacular](https://github.com/textacular/textacular) for
 
 Example of usage:
 
-    employees = EmployeesListQuerie.new(Employee, {'pattern' => 'whatever'})
+    employees = EmployeesListQuery.new(Employee, {'pattern' => 'whatever'})
 
 This will use `simple_search`, and if it will return no entries Mincer will run `fuzzy_search`. For more details on what
 is the difference between them, plese look refer to `textacular` github [page](https://github.com/textacular/textacular).
@@ -202,7 +202,7 @@ Cons:
 
 To dump query result to json string you have to call `to_json` on Mincer object:
 
-    EmployeesListQuerie.new(Employee).to_json
+    EmployeesListQuery.new(Employee).to_json
     
 In our example it will return something like this 
 
@@ -210,7 +210,7 @@ In our example it will return something like this
     
 In addition you can pass option `root` to `to_json` method if you need to include root to json string:
     
-    EmployeesListQuerie.new(Employee).to_json(root: 'employees')
+    EmployeesListQuery.new(Employee).to_json(root: 'employees')
     # returns
     "{\"employees\":[{\"id\":1,\"employee_name\":\"John Smith\",\"company_name\":\"Microsoft\"},{\"id\":2,\"employee_name\":\"Jane Smith\",\"company_name\":\"37 Signals\"}]}"
 
@@ -219,7 +219,7 @@ In addition you can pass option `root` to `to_json` method if you need to includ
 
 Digest is very usefull for cache invalidation on your views when you are using custom queries. We will modify a bit example:
 
-    class EmployeesListQuerie < Mincer::Base
+    class EmployeesListQuery < Mincer::Base
         digest! %w{employee_updated_at company_updated_at}
     
         def build_query(relation, args)
@@ -236,7 +236,7 @@ Digest is very usefull for cache invalidation on your views when you are using c
 
 In this example we will use 2 updated_at timestamps to generate digest. Whenever one of them will change - digest will change also. To get digest you should use method `digest` on Mincer model
 
-    EmployeesListQuerie.new(Employee).digest # "\\x20e93b4dc5e029130f3d60d697137934"
+    EmployeesListQuery.new(Employee).digest # "\\x20e93b4dc5e029130f3d60d697137934"
     
 To generate digest you need to install extension 'pgcrypto'. If you use Rails, please use migration for that
     

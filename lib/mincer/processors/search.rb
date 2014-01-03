@@ -9,7 +9,7 @@ module Mincer
         if Mincer.postgres? && !textacular?
           warn 'You must include "textacular" to  your Gemfile to use search'
           @relation
-        elsif Mincer.postgres? && @args['pattern']
+        elsif Mincer.postgres? && @args['pattern'].present?
           @relation.basic_search(@args['pattern']).presence || @relation.fuzzy_search(@args['pattern'])
         else
           @relation

@@ -7,13 +7,17 @@ module Mincer
       end
 
       def apply
-        relation = @relation.order("#{sort_attr} #{order_attr}")
+        relation = @relation.order(sort_string)
         @mincer.sort_attribute, @mincer.sort_order = relation.try(:order_values).try(:first).try(:split)
         relation
       end
 
+      def sort_string
+        sort_attr ? "#{sort_attr} #{order_attr}, #{@mincer.default_sort_attribute}" : "#{@mincer.default_sort_attribute} #{order_attr}"
+      end
+
       def sort_attr
-        (@mincer.allowed_sort_attributes.include?(@args['sort']) && @args['sort']) || @mincer.send(:default_sort_attribute)
+        @mincer.allowed_sort_attributes.include?(@args['sort']) && @args['sort']
       end
 
       def order_attr

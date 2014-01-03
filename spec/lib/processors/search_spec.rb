@@ -33,6 +33,11 @@ describe ::Mincer::Processors::Search do
           query = subject.new(ActiveRecordModel, { 'pattern' => 'Bingo' })
           query.to_a.count.should eq(1)
         end
+
+        it 'avoids search when pattern is an empty string or spaces' do
+          query = subject.new(ActiveRecordModel, { 'pattern' => ' ' })
+          query.to_a.count.should eq(3)
+        end
       end
 
 

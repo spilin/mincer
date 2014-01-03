@@ -20,3 +20,5 @@ Guardfile
 atlassian-ide-plugin.xml
 .rspec
 spec/database.yml
+.ruby-gemset
+.ruby-version

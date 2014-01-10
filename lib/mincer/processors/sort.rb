@@ -13,15 +13,15 @@ module Mincer
       end
 
       def sort_string
-        sort_attr ? "#{sort_attr} #{order_attr}, #{@mincer.default_sort_attribute}" : "#{@mincer.default_sort_attribute} #{order_attr}"
+        sort_attr ? "#{sort_attr} #{order_attr}, #{@mincer.send(:default_sort_attribute)}" : "#{@mincer.send(:default_sort_attribute)} #{order_attr}"
       end
 
       def sort_attr
-        @mincer.allowed_sort_attributes.include?(@args['sort']) && @args['sort']
+        @mincer.send(:allowed_sort_attributes).include?(@args['sort']) && @args['sort']
       end
 
       def order_attr
-        (%w{ASC DESC}.include?(@args['order']) && @args['order']) || @mincer.default_sort_order
+        (%w{ASC DESC}.include?(@args['order']) && @args['order']) || @mincer.send(:default_sort_order)
       end
     end
 

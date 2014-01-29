@@ -11,9 +11,9 @@ module Mincer
 
       def opposite_order_for(collection, attribute)
         return nil unless collection.sort_attribute == attribute.to_s
-        if collection.sort_order.to_s.upcase == 'ASC'
+        if collection.sort_order.to_s.downcase == 'asc'
           'DESC'
-        elsif collection.sort_order.to_s.upcase == 'DESC'
+        elsif collection.sort_order.to_s.downcase == 'desc'
           'ASC'
         else
           'ASC'

@@ -8,7 +8,7 @@ module Mincer
 
       def apply
         relation = @relation.order(sort_string)
-        @mincer.sort_attribute, @mincer.sort_order = relation.try(:order_values).try(:first).try(:split)
+        @mincer.sort_attribute, @mincer.sort_order = sort_attr, order_attr
         relation
       end
 

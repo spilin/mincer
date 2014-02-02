@@ -1,15 +1,15 @@
 # Mincer
 [![Build Status](https://travis-ci.org/spilin/mincer.png)](https://travis-ci.org/spilin/mincer)
-[![Code Climate](https://codeclimate.com/repos/52b775836956801ba7000bdb/badges/ec5d5862e4b89d10695c/gpa.png)](https://codeclimate.com/repos/52b775836956801ba7000bdb/feed)
+[![Code Climate](https://codeclimate.com/github/spilin/mincer.png)](https://codeclimate.com/github/spilin/mincer)
 [![Gem Version](https://badge.fury.io/rb/mincer.png)](http://badge.fury.io/rb/mincer)
 
 Mincer is an ActiveRecord::Relation wrapper that applies usefull features to your queries. It can:
 
-[Paginate](#pagination)     
-[Sort](#sort)   
-[Search](#search)   
-[Dump to Json(Using postgres >= 9.2)](#json)    
-[Generate digest(usefull for caching)](#digest) 
+[Paginate](#pagination)
+[Sort](#sort)
+[Search](#search)
+[Dump to Json(Using postgres >= 9.2)](#json)
+[Generate digest(usefull for caching)](#digest)
 
 
 ## Installation
@@ -32,25 +32,25 @@ Lets assume we have 2 models
     class Employee < ActiveRecord::Base
         belongs_to :company
     end
-    
+
     class Company < ActiveRecord::Base
         has_many :employees
     end
-    
+
 Lets create class EmployeesListQuery class that will inherit from Mincer::Base, and instantiate it
 
     class EmployeesListQuery < Mincer::Base
         # method should always return relation
         def build_query(relation, args)
             custom_select = <<-SQL
-                employees.id, 
-                employees.full_name as employee_name, 
+                employees.id,
+                employees.full_name as employee_name,
                 companies.name as company_name
             SQL
             relation.joins(:company).select(custom_select)
         end
     end
-    
+
     employees = EmployeesListQuery.new(Employee)
 
 `employees` will delegate all methods, that it can't find on itself, to relation objects. This means you can use
@@ -60,29 +60,29 @@ Lets create class EmployeesListQuery class that will inherit from Mincer::Base, 
         <%= employee.employee_name %>
         <%= employee.company_name %>
     <% end %>
-    
+
 
 Now lets's look what more can we do with this object
 
 <a name="pagination"/>
 ### Pagination
-Mincer supports [kaminari](https://github.com/amatsuda/kaminari) and [will_paginate](https://github.com/mislav/will_paginate). In order to use pagination you need to include one of them 
+Mincer supports [kaminari](https://github.com/amatsuda/kaminari) and [will_paginate](https://github.com/mislav/will_paginate). In order to use pagination you need to include one of them
 to your `Gemfile`. Example of using pagination
 
     employees = EmployeesListQuery.new(Employee, {'page' => 2, 'per_page' => 10})
-    
+
 By default all `Micner` objects will use pagination, even if no arguments are passed. To set default values for pagination please refer to `kaminari` or `will_paginate` documentation.
 
 To disable pagination you can use class method `skip_pagination!`:
 
     class EmployeesListQuery < Mincer::Base
         skip_pagination!
-        
+
         # method should always return relation
         def build_query(relation, args)
             custom_select = <<-SQL
-                employees.id, 
-                employees.full_name as employee_name, 
+                employees.id,
+                employees.full_name as employee_name,
                 companies.name as company_name
             SQL
             relation.joins(:company).select(custom_select)
@@ -95,21 +95,21 @@ To disable pagination you can use class method `skip_pagination!`:
 Example of using sorting:
 
     employees = EmployeesListQuery.new(Employee, {'sort' => 'employee_name', 'order' => 'DESC'})
-    
-By default all Mincer objects will sort by attribute `id` and order `ASC`. To change defaults you can override 
+
+By default all Mincer objects will sort by attribute `id` and order `ASC`. To change defaults you can override
 them like this
 
     class EmployeesListQuery < Mincer::Base
         # method should always return relation
         def build_query(relation, args)
             custom_select = <<-SQL
-                employees.id, 
-                employees.full_name as employee_name, 
+                employees.id,
+                employees.full_name as employee_name,
                 companies.name as company_name
             SQL
             relation.joins(:company).select(custom_select)
         end
-        
+
       def default_sort_attribute
         'employee_name'
       end
@@ -117,18 +117,18 @@ them like this
       def default_sort_order
         'DESC'
       end
-    end    
-    
+    end
+
 To disable sorting use class method `skip_sorting!` like this:
 
     class EmployeesListQuery < Mincer::Base
         skip_sorting!
-        
+
         # method should always return relation
         def build_query(relation, args)
             custom_select = <<-SQL
-                employees.id, 
-                employees.full_name as employee_name, 
+                employees.id,
+                employees.full_name as employee_name,
                 companies.name as company_name
             SQL
             relation.joins(:company).select(custom_select)
@@ -157,7 +157,7 @@ If you are using Rails or bare ActionView there are few helper methods at your d
 for sorting. Currently there are 2 methods available: `sort_url_for` and `sort_class_for`.
 
 Example of usage in HAML:
-    
+
     %ul
         %li{ :class => (sort_class_for employees, 'id') }
             = link_to 'ID', sort_url_for(employees, 'id')
@@ -165,14 +165,14 @@ Example of usage in HAML:
             = link_to 'Employee', sort_url_for(employees, 'employee_name')
         %li{ :class => (sort_class_for employees, 'company_name') }
             = link_to 'Company', sort_url_for(employees, 'company_name')
-      
+
 In this example `li` will receive `class="sorted order_down"` or `class="sorted order_up"` if this attribue was used for search.
 Generated url will be enchanced with `sort` and `order` attributes.
 
 <a name="search"/>
 ### Search
 
-Currently Mincer uses [Textacular](https://github.com/textacular/textacular) for search. This sets alot of restrictions: 
+Currently Mincer uses [Textacular](https://github.com/textacular/textacular) for search. This sets alot of restrictions:
 1. Works only with postgres
 2. You have to include `textacular` to your Gemfile
 3. You have to install postgres extension that [Textacular](https://github.com/textacular/textacular) uses for searching.
@@ -190,7 +190,7 @@ is the difference between them, plese look refer to `textacular` github [page](h
 Mincer allowes you to dump query result to JSON using [Postgres JSON Functions](http://www.postgresql.org/docs/9.3/static/functions-json.html)
 Didn't had time to do benchmarks - but its' extremely fast.
 
-Pros: 
+Pros:
 
 1. Speed
 2. No extra dependencies(you don't need any other JSON generators)
@@ -203,31 +203,31 @@ Cons:
 To dump query result to json string you have to call `to_json` on Mincer object:
 
     EmployeesListQuery.new(Employee).to_json
-    
-In our example it will return something like this 
+
+In our example it will return something like this
 
     "[{\"id\":1,\"employee_name\":\"John Smith\",\"company_name\":\"Microsoft\"},{\"id\":2,\"employee_name\":\"Jane Smith\",\"company_name\":\"37 Signals\"}]"
-    
+
 In addition you can pass option `root` to `to_json` method if you need to include root to json string:
-    
+
     EmployeesListQuery.new(Employee).to_json(root: 'employees')
     # returns
     "{\"employees\":[{\"id\":1,\"employee_name\":\"John Smith\",\"company_name\":\"Microsoft\"},{\"id\":2,\"employee_name\":\"Jane Smith\",\"company_name\":\"37 Signals\"}]}"
 
-<a name="digest"/> 
+<a name="digest"/>
 ### Digest
 
 Digest is very usefull for cache invalidation on your views when you are using custom queries. We will modify a bit example:
 
     class EmployeesListQuery < Mincer::Base
         digest! %w{employee_updated_at company_updated_at}
-    
+
         def build_query(relation, args)
             custom_select = <<-SQL
-                employees.id, 
-                employees.full_name as employee_name, 
+                employees.id,
+                employees.full_name as employee_name,
                 companies.name as company_name,
-                employees.updated_at as employee_updated_at, 
+                employees.updated_at as employee_updated_at,
                 companies.updated_at as company_updated_at
             SQL
             relation.joins(:company).select(custom_select)
@@ -237,11 +237,11 @@ Digest is very usefull for cache invalidation on your views when you are using c
 In this example we will use 2 updated_at timestamps to generate digest. Whenever one of them will change - digest will change also. To get digest you should use method `digest` on Mincer model
 
     EmployeesListQuery.new(Employee).digest # "\\x20e93b4dc5e029130f3d60d697137934"
-    
+
 To generate digest you need to install extension 'pgcrypto'. If you use Rails, please use migration for that
-    
+
     enable_extension 'pgcrypto'
-    
+
 or run `CREATE EXTENSION IF NOT EXISTS pgcrypto;`
 
 

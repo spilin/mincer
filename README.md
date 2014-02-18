@@ -54,7 +54,7 @@ Lets create class EmployeesListQuery class that will inherit from Mincer::Base, 
     employees = EmployeesListQuery.new(Employee)
 
 `employees` will delegate all methods, that it can't find on itself, to relation objects. This means you can use
-`employess` as you would use any ActiveRecord::Relation object:
+`employees` as you would use any ActiveRecord::Relation object:
 
     <% employees.each do |employee| %>
         <%= employee.employee_name %>
@@ -67,7 +67,7 @@ Now lets's look what more can we do with this object
 <a name="pagination"/>
 ### Pagination
 Mincer supports [kaminari](https://github.com/amatsuda/kaminari) and [will_paginate](https://github.com/mislav/will_paginate). In order to use pagination you need to include one of them
-to your `Gemfile`. Example of using pagination
+in your `Gemfile`. Example of using pagination
 
     employees = EmployeesListQuery.new(Employee, {'page' => 2, 'per_page' => 10})
 
@@ -96,7 +96,7 @@ Example of using sorting:
 
     employees = EmployeesListQuery.new(Employee, {'sort' => 'employee_name', 'order' => 'DESC'})
 
-By default all Mincer objects will sort by attribute `id` and order `ASC`. To change defaults you can override
+By default all Mincer objects will sort by attribute `id` in `ASC` order. To change defaults you can override
 them like this
 
     class EmployeesListQuery < Mincer::Base
@@ -136,15 +136,15 @@ To disable sorting use class method `skip_sorting!` like this:
     end
 
 Mincer will validate `sort` and `order` params and will not allow to sort by attributes that do not exist.
-Default white list consists of all atttributes from original scope, in our example `Employee.attribute_name`.
-You can expand the list overriding `allowed_sort_attributes` list like this:
+Default white list consists of all attributes from original scope, in our example `Employee.attribute_name`.
+You can expand the list by overriding `allowed_sort_attributes` list like this:
 
     def allowed_sort_attributes
         super + %w{employee_name company_name}
     end
 This will allow to sort by all Employee attributes + `employee_name` and `company_name`
 
-Or restrict like this:
+Or restrict it like this:
 
     def allowed_sort_attributes
         %w{employee_name}
@@ -181,14 +181,14 @@ Example of usage:
 
     employees = EmployeesListQuery.new(Employee, {'pattern' => 'whatever'})
 
-This will use `simple_search`, and if it will return no entries Mincer will run `fuzzy_search`. For more details on what
+It will use `simple_search`, and if it will return no entries Mincer will run `fuzzy_search`. For more details on what
 is the difference between them, plese look refer to `textacular` github [page](https://github.com/textacular/textacular).
 
 <a name="json"/>
 ### JSON generation
 
 Mincer allowes you to dump query result to JSON using [Postgres JSON Functions](http://www.postgresql.org/docs/9.3/static/functions-json.html)
-Didn't had time to do benchmarks - but its' extremely fast.
+Didn't had time to do benchmarking, but it's extremely fast.
 
 Pros:
 
@@ -247,10 +247,10 @@ or run `CREATE EXTENSION IF NOT EXISTS pgcrypto;`
 
 ## TODO
 
-1. Create general configuration for Mincer that would allow:
-    1. Changing sort html classes
-    2. Changing default arguments(sort, order, pattern, page, per_page..)
-    3. Disabling some processors for all Mincer objects
+1. Create general configuration for Mincer that would allow to:
+    1. Change sort html classes
+    2. Change default arguments(sort, order, pattern, page, per_page..)
+    3. Disable some processors for all Mincer objects
 2. Create rails generators.
 
 

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ::Mincer::Processors::Sort do
+describe ::Mincer::Processors::Sorting::Processor do
   before do
     setup_basic_sqlite3_table
     class ActiveRecordModel < ActiveRecord::Base

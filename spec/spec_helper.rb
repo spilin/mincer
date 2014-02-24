@@ -15,8 +15,6 @@ require 'bundler/setup'
 require 'active_record'
 require 'kaminari'
 Kaminari::Hooks.init
-require 'textacular'
-ActiveRecord::Base.extend(Textacular)
 require 'mincer'
 
 require 'support/postgres_adapter'

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ::Mincer::Processors::Search do
+describe ::Mincer::Processors::PgSearch::Processor do
   context 'when postgres used' do
     before do
       setup_basic_postgres_table
@@ -9,18 +9,6 @@ describe ::Mincer::Processors::Search do
       ActiveRecordModel.create!(text: 'Test')
       ActiveRecordModel.create!(text: 'Bingo')
       ActiveRecordModel.create!(text: 'Bongo')
-    end
-
-    describe 'search without "textacular"' do
-      subject(:model) do
-        Class.new(Mincer::Base)
-      end
-
-      it 'searches by pattern in args' do
-        ::Mincer::Processors::Search.any_instance.stub(:textacular?).and_return(false)
-        query = subject.new(ActiveRecordModel, { 'pattern' => 'Bingo' })
-        query.to_a.count.should eq(3)
-      end
     end
 
     describe 'search with "textacular"' do

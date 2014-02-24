@@ -185,6 +185,19 @@ you can override `pg_search_options`:
     { :columns => %w{employees.full_name companies.name} }
   end
 
+By default search will use [unaccent] to ignore accent marks. You can read more about `unaccent` [here](http://www.postgresql.org/docs/current/static/unaccent.html)
+You need to enable `unaccent` extension. If you use Rails, please use migration for that:
+
+    enable_extension 'unaccent'
+
+or run `CREATE EXTENSION IF NOT EXISTS unaccent;`
+
+If by any chance you need to disable `unaccent`:
+
+   def pg_search_options
+    { :ignore_accent => false }
+  end
+
 <a name="json"/>
 ### JSON generation
 

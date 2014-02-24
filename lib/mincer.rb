@@ -1,6 +1,4 @@
 require 'mincer/version'
-
-
 require 'mincer/base'
 
 module Mincer
@@ -20,6 +18,14 @@ module Mincer
     processor_scope = ::Mincer::Processors.const_get(processor.to_s.camelize)
     ::Mincer.processors << processor_scope.const_get('Processor')
     ::Mincer::Base.send(:include, processor_scope.const_get('Options'))
+  end
+
+  def self.pg_extension_installed?(extension)
+    @installed_extensions ||= {}
+    if @installed_extensions[extension.to_sym].nil?
+      @installed_extensions[extension.to_sym] = ::Mincer.connection.execute("SELECT DISTINCT p.proname FROM pg_proc p WHERE p.proname = '#{extension}'").count > 0
+    end
+    @installed_extensions[extension.to_sym]
   end
 end
 

@@ -17,7 +17,7 @@ module Mincer
 
         def apply_pg_search(relation, pattern)
           @mincer.pg_search_options[:columns] ||= default_columns
-          search_feature = Mincer::PgSearch::TSearch.new(pattern, default_options.merge(@mincer.pg_search_options))
+          search_feature = Mincer::PgSearch::TSearch.new(pattern, default_options.merge(@mincer.send(:pg_search_options)))
           relation.where(search_feature.conditions)
         end
 

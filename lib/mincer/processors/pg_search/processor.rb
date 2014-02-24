@@ -17,13 +17,17 @@ module Mincer
 
         def apply_pg_search(relation, pattern)
           @mincer.pg_search_options[:columns] ||= default_columns
-          search_feature = Mincer::PgSearch::TSearch.new(pattern, @mincer.pg_search_options)
+          search_feature = Mincer::PgSearch::TSearch.new(pattern, default_options.merge(@mincer.pg_search_options))
           relation.where(search_feature.conditions)
         end
 
         def default_columns
           table_name = @relation.table_name
           @relation.columns.map { |column| "#{table_name}.#{column.name}" if [:string, :text].include?(column.type) }.compact
+        end
+
+        def default_options
+          { ignore_accent: true }
         end
 
       end

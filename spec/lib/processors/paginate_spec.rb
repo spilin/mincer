@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ::Mincer::Processors::Paginate do
+describe ::Mincer::Processors::Pagination::Processor do
   before do
     setup_basic_sqlite3_table
     class ActiveRecordModel < ActiveRecord::Base
@@ -76,8 +76,8 @@ describe ::Mincer::Processors::Paginate do
   context 'when there is no gem for pagination in loaded' do
     it 'returns all items' do
       subject = Class.new(Mincer::Base)
-      ::Mincer::Processors::Paginate.any_instance.stub(:kaminari?).and_return(false)
-      ::Mincer::Processors::Paginate.any_instance.stub(:will_paginate?).and_return(false)
+      ::Mincer::Processors::Pagination::Processor.any_instance.stub(:kaminari?).and_return(false)
+      ::Mincer::Processors::Pagination::Processor.any_instance.stub(:will_paginate?).and_return(false)
 
       query = subject.new(ActiveRecordModel)
       query.to_a.count.should eq(30)

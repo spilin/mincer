@@ -15,24 +15,22 @@ module Mincer
   def self.connection
     ::ActiveRecord::Base.connection()
   end
+
+  def self.add_processor(processor)
+    processor_scope = ::Mincer::Processors.const_get(processor.to_s.camelize)
+    ::Mincer.processors << processor_scope.const_get('Processor')
+    ::Mincer::Base.send(:include, processor_scope.const_get('Options'))
+  end
 end
 
 
 # Loading processors
-require 'mincer/processors/sort'
-require 'mincer/processors/paginate'
-require 'mincer/processors/search'
-require 'mincer/processors/cache_digest'
-require 'mincer/processors/pg_json_dumper'
-::Mincer::Processors.constants.each do |k|
-  klass = ::Mincer::Processors.const_get(k)
-  if klass.is_a?(Class)
-    ::Mincer.processors << klass
-  elsif klass.is_a?(Module)
-    ::Mincer::Base.send(:include, klass)
-  end
-end
-
+require 'mincer/processors/sorting/processor'
+require 'mincer/processors/pagination/processor'
+require 'mincer/processors/pg_search/t_search'
+require 'mincer/processors/pg_search/processor'
+require 'mincer/processors/cache_digest/processor'
+require 'mincer/processors/pg_json_dumper/processor'
 
 # Loading ActionView helpers
 if defined?(ActionView)

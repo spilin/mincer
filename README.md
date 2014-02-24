@@ -71,7 +71,7 @@ in your `Gemfile`. Example of using pagination
 
     employees = EmployeesListQuery.new(Employee, {'page' => 2, 'per_page' => 10})
 
-By default all `Micner` objects will use pagination, even if no arguments are passed. To set default values for pagination please refer to `kaminari` or `will_paginate` documentation.
+By default all `Mincer` objects will use pagination, even if no arguments are passed. To set default values for pagination please refer to `kaminari` or `will_paginate` documentation.
 
 To disable pagination you can use class method `skip_pagination!`:
 
@@ -166,28 +166,29 @@ Example of usage in HAML:
         %li{ :class => (sort_class_for employees, 'company_name') }
             = link_to 'Company', sort_url_for(employees, 'company_name')
 
-In this example `li` will receive `class="sorted order_down"` or `class="sorted order_up"` if this attribue was used for search.
-Generated url will be enchanced with `sort` and `order` attributes.
+In this example `li` will receive `class="sorted order_down"` or `class="sorted order_up"` if this attribute was used for search.
+Generated url will be enhanced with `sort` and `order` attributes.
 
 <a name="search"/>
 ### Search
 
-Currently Mincer uses [Textacular](https://github.com/textacular/textacular) for search. This sets alot of restrictions:
-1. Works only with postgres
-2. You have to include `textacular` to your Gemfile
-3. You have to install postgres extension that [Textacular](https://github.com/textacular/textacular) uses for searching.
+Mincer borrowed alot of search logic from [PgSearch](https://github.com/Casecommons/pg_search). Currently search only works with postgres
 
 Example of usage:
 
     employees = EmployeesListQuery.new(Employee, {'pattern' => 'whatever'})
 
-It will use `simple_search`, and if it will return no entries Mincer will run `fuzzy_search`. For more details on what
-is the difference between them, plese look refer to `textacular` github [page](https://github.com/textacular/textacular).
+By default search will be performed on all text/string columns of current model. If you want to explicitly set searchable columns
+you can override `pg_search_options`:
+
+  def pg_search_options
+    { :columns => %w{employees.full_name companies.name} }
+  end
 
 <a name="json"/>
 ### JSON generation
 
-Mincer allowes you to dump query result to JSON using [Postgres JSON Functions](http://www.postgresql.org/docs/9.3/static/functions-json.html)
+Mincer allows you to dump query result to JSON using [Postgres JSON Functions](http://www.postgresql.org/docs/9.3/static/functions-json.html)
 Didn't had time to do benchmarking, but it's extremely fast.
 
 Pros:

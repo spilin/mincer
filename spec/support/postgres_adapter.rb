@@ -1,4 +1,4 @@
-def setup_basic_postgres_table
+def setup_postgres_table(columns = [['id', 'SERIAL PRIMARY KEY'], ['text', 'TEXT']])
   config = if ENV['TRAVIS']
              { adapter: :postgresql, database: 'mincer', username: 'postgres' }
            else
@@ -7,5 +7,9 @@ def setup_basic_postgres_table
 
   ActiveRecord::Base.establish_connection(config)
   ActiveRecord::Base.connection.execute('DROP TABLE IF EXISTS active_record_models')
-  ActiveRecord::Base.connection.execute('CREATE TABLE IF NOT EXISTS active_record_models (id SERIAL PRIMARY KEY, text TEXT)')
+
+  columns_sql = columns.map {|column| column.join(' ') }.join(',')
+  ActiveRecord::Base.connection.execute("CREATE TABLE IF NOT EXISTS active_record_models (#{columns_sql})")
 end
+
+

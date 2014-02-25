@@ -1,6 +1,6 @@
 module Mincer
   module PgSearch
-    class TSearch
+    class FulltextSearch < SearchEngine
 
       def initialize(pattern, options)
         @pattern = pattern
@@ -18,23 +18,6 @@ module Mincer
 
       attr_reader :pattern, :options, :columns
 
-      def document
-        columns.map { |column| column.to_sql }.join(" || ' ' || ")
-      end
-
-      # { :ignoring => :accents } in options
-      def normalize(sql_expression)
-        return sql_expression unless options[:ignore_accent] && ::Mincer.pg_extension_installed?(:unaccent)
-
-        sql_node = case sql_expression
-                   when Arel::Nodes::Node
-                     sql_expression
-                   else
-                     Arel.sql(sql_expression)
-                   end
-
-        Arel::Nodes::NamedFunction.new('unaccent', [sql_node]).to_sql
-      end
 
       # Not Used
       def rank

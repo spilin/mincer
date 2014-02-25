@@ -9,7 +9,7 @@ Mincer is an ActiveRecord::Relation wrapper that applies usefull features to you
 [Sort](#sort)
 [Search](#search)
 [Dump to Json(Using postgres >= 9.2)](#json)
-[Generate digest(usefull for caching)](#digest)
+[Generate digest(useful for caching)](#digest)
 
 
 ## Installation
@@ -62,16 +62,18 @@ Lets create class EmployeesListQuery class that will inherit from Mincer::Base, 
     <% end %>
 
 
-Now lets's look what more can we do with this object
+Now lets look what more can we do with this object
 
 <a name="pagination"/>
 ### Pagination
-Mincer supports [kaminari](https://github.com/amatsuda/kaminari) and [will_paginate](https://github.com/mislav/will_paginate). In order to use pagination you need to include one of them
+Mincer supports [kaminari](https://github.com/amatsuda/kaminari) and [will_paginate](https://github.com/mislav/will_paginate).
+In order to use pagination you need to include one of them
 in your `Gemfile`. Example of using pagination
 
     employees = EmployeesListQuery.new(Employee, {'page' => 2, 'per_page' => 10})
 
-By default all `Mincer` objects will use pagination, even if no arguments are passed. To set default values for pagination please refer to `kaminari` or `will_paginate` documentation.
+By default all `Mincer` objects will use pagination, even if no arguments are passed.
+To set default values for pagination please refer to `kaminari` or `will_paginate` documentation.
 
 To disable pagination you can use class method `skip_pagination!`:
 
@@ -172,7 +174,8 @@ Generated url will be enhanced with `sort` and `order` attributes.
 <a name="search"/>
 ### Search
 
-Mincer borrowed alot of search logic from [PgSearch](https://github.com/Casecommons/pg_search). Currently search only works with postgres
+Mincer borrowed allot of search logic from [PgSearch](https://github.com/Casecommons/pg_search).
+Currently search only works with postgres.
 
 Example of usage:
 
@@ -194,8 +197,14 @@ or run `CREATE EXTENSION IF NOT EXISTS unaccent;`
 
 If by any chance you need to disable `unaccent`:
 
-   def pg_search_options
+  def pg_search_options
     { :ignore_accent => false }
+  end
+
+If you will set `any_word` attribute to true - search will return all items containing any word in the search terms.
+
+  def pg_search_options
+    { :any_word => true }
   end
 
 <a name="json"/>
@@ -231,7 +240,7 @@ In addition you can pass option `root` to `to_json` method if you need to includ
 <a name="digest"/>
 ### Digest
 
-Digest is very usefull for cache invalidation on your views when you are using custom queries. We will modify a bit example:
+Digest is very useful for cache invalidation on your views when you are using custom queries. We will modify a bit example:
 
     class EmployeesListQuery < Mincer::Base
         digest! %w{employee_updated_at company_updated_at}

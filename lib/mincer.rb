@@ -33,7 +33,10 @@ end
 # Loading processors
 require 'mincer/processors/sorting/processor'
 require 'mincer/processors/pagination/processor'
-require 'mincer/processors/pg_search/t_search'
+require 'mincer/processors/pg_search/search_engine'
+require 'mincer/processors/pg_search/array_search'
+require 'mincer/processors/pg_search/fulltext_search'
+require 'mincer/processors/pg_search/trigram_search'
 require 'mincer/processors/pg_search/processor'
 require 'mincer/processors/cache_digest/processor'
 require 'mincer/processors/pg_json_dumper/processor'
@@ -46,19 +49,3 @@ if defined?(ActionView)
     ActionView::Base.send(:include, klass) if klass.is_a?(Module)
   end
 end
-
-
-#if defined?(::Rails)
-#  module Mincer
-#    class Railtie < ::Rails::Railtie
-#      initializer 'mincer.setup_paths' do
-#      end
-#
-#      initializer 'carrierwave.active_record' do
-#        #ActiveSupport.on_load :active_record do
-#        #  require 'carrierwave/orm/activerecord'
-#        #end
-#      end
-#    end
-#  end
-#end

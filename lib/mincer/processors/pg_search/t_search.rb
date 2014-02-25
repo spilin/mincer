@@ -72,9 +72,13 @@ module Mincer
       def tsdocument
         columns.map do |search_column|
           Arel::Nodes::NamedFunction.new('to_tsvector',
-              [dictionary, Arel.sql(normalize(search_column))]
+              [dictionary, coalesce(Arel.sql(normalize(search_column)))]
           ).to_sql
         end.join(' || ')
+      end
+
+      def coalesce(value1, value2 = '')
+        Arel::Nodes::NamedFunction.new('coalesce', [value1, value2] )
       end
 
       # From http://www.postgresql.org/docs/8.3/static/textsearch-controls.html

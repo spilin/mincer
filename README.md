@@ -207,6 +207,12 @@ If you will set `any_word` attribute to true - search will return all items cont
     { :any_word => true }
   end
 
+If you will set `ignore_case` attribute to true - search will ignore case.
+
+  def pg_search_options
+    { :ignore_case => true }
+  end
+
 <a name="json"/>
 ### JSON generation
 

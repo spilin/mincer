@@ -18,7 +18,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
           Class.new(Mincer::Base)
         end
 
-        describe 'searching with t_search' do
+        describe 'searching with fulltext search' do
           it 'searches by pattern in args' do
             query = subject.new(ActiveRecordModel, { 'pattern' => 'Bingo' })
             query.to_a.count.should eq(1)
@@ -45,7 +45,8 @@ describe ::Mincer::Processors::PgSearch::Processor do
             end
           end
 
-          context 'when column with array type exists' do
+
+          describe 'searching with array' do
             before do
               setup_postgres_table([['id', 'SERIAL PRIMARY KEY'], ['text', 'TEXT'], ['tags', 'TEXT[]']])
               class ActiveRecordModel < ActiveRecord::Base
@@ -58,7 +59,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
             it 'includes 2 items when both matched with array overlap(&&)' do
               subject = Class.new(Mincer::Base) do
                 def pg_search_options
-                  { :array_columns => %w{"active_record_models"."tags" } }
+                  [{ :columns => %w{"active_record_models"."tags" }, engines: [:array] }]
                 end
               end
               query = subject.new(ActiveRecordModel, { 'pattern' => 'b' })
@@ -68,7 +69,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
             it 'includes 1 item when match was found on one item with array overlap(&&)' do
               subject = Class.new(Mincer::Base) do
                 def pg_search_options
-                  { :array_columns => %w{"active_record_models"."tags" } }
+                  [{ :columns => %w{"active_record_models"."tags" }, engines: [:array] }]
                 end
               end
               query = subject.new(ActiveRecordModel, { 'pattern' => 'c' })
@@ -78,7 +79,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
             it 'includes both when matched with array overlap(&&)' do
               subject = Class.new(Mincer::Base) do
                 def pg_search_options
-                  { :array_columns => %w{"active_record_models"."tags" } }
+                  [{ :columns => %w{"active_record_models"."tags" }, engines: [:array] }]
                 end
               end
               query = subject.new(ActiveRecordModel, { 'pattern' => 'a c d' })
@@ -88,7 +89,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
             it 'includes both when matched with array overlap(&&)(separated with ",")' do
               subject = Class.new(Mincer::Base) do
                 def pg_search_options
-                  { :array_columns => %w{"active_record_models"."tags" } }
+                  [{ :columns => %w{"active_record_models"."tags" }, engines: [:array] }]
                 end
               end
               query = subject.new(ActiveRecordModel, { 'pattern' => 'a, c,d' })
@@ -98,7 +99,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
             it 'includes no items when nothing matched pattern' do
               subject = Class.new(Mincer::Base) do
                 def pg_search_options
-                  { :array_columns => %w{"active_record_models"."tags" } }
+                  [{ :columns => %w{"active_record_models"."tags" }, engines: [:array] }]
                 end
               end
               query = subject.new(ActiveRecordModel, { 'pattern' => 'd e' })

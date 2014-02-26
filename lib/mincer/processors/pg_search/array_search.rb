@@ -10,6 +10,7 @@ module Mincer
 
       def conditions
         Arel::Nodes::Grouping.new(
+            # <@
             Arel::Nodes::InfixOperation.new('&&', document, query)
         )
       end

@@ -27,6 +27,11 @@ module Mincer
     end
     @installed_extensions[extension.to_sym]
   end
+
+  def self.configure
+    @config = yield(Config.new)
+  end
+
 end
 
 

@@ -1,6 +1,6 @@
 module Mincer
   module PgSearch
-    class ArraySearch
+    class ArraySearch < SearchEngine
 
       def initialize(pattern, options)
         @pattern = pattern
@@ -10,7 +10,7 @@ module Mincer
 
       def conditions
         Arel::Nodes::Grouping.new(
-            Arel::Nodes::InfixOperation.new('&&', array_typecast(arel_columns), arel_array)
+            Arel::Nodes::InfixOperation.new('&&', document, query)
         )
       end
 
@@ -18,20 +18,27 @@ module Mincer
 
       attr_reader :pattern, :options, :columns
 
-      def arel_columns
-        Arel::Nodes::Grouping.new( Arel.sql(columns.join(' || '))  )
+      def document
+        Arel.sql("#{Arel::Nodes::Grouping.new(Arel.sql(normalized_columns)).to_sql}::text[]")
       end
 
-      def array_typecast(node)
-        Arel.sql("#{node.to_sql}::text[]")
+      def normalized_columns
+        columns.join(' || ')
       end
 
-      def arel_array
+      def query
         Arel::Nodes::NamedFunction.new('string_to_array', [normalized_pattern, ','])
       end
 
       def normalized_pattern
-        @normalized_pattern ||= @pattern.split(%r{\s|,}).uniq.reject(&:empty?).join(',')
+        @pattern.split(%r{\s|,}).uniq.reject(&:empty?).map do |item|
+          normalize(item)
+        end.join(',')
+      end
+
+
+      def normalize(item)
+        options[:ignore_case] ? item.downcase : item
       end
 
     end

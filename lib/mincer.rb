@@ -29,7 +29,11 @@ module Mincer
   end
 
   def self.configure
-    @config = yield(Config.new)
+    @config = yield(config)
+  end
+
+  def self.config
+    @config || Config.new
   end
 
 end

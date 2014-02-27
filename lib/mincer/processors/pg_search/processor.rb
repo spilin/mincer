@@ -3,6 +3,9 @@ module Mincer
   module Processors
     module PgSearch
       class Processor
+        include ActiveSupport::Configurable
+        config_accessor :param_name, :fulltext_engine, :trigram_engine, :array_engine
+
         def initialize(mincer)
           @mincer, @args, @relation = mincer, mincer.args, mincer.relation
         end

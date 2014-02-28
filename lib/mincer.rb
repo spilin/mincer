@@ -1,4 +1,6 @@
+require 'ostruct'
 require 'mincer/version'
+require 'mincer/config'
 require 'mincer/base'
 
 module Mincer
@@ -17,7 +19,8 @@ module Mincer
   def self.add_processor(processor)
     processor_scope = ::Mincer::Processors.const_get(processor.to_s.camelize)
     ::Mincer.processors << processor_scope.const_get('Processor')
-    ::Mincer::Base.send(:include, processor_scope.const_get('Options'))
+    ::Mincer::Base.send(:include, processor_scope.const_get('Options')) if processor_scope.const_defined?('Options')
+    ::Mincer.config.add(processor, processor_scope.const_get('Configuration'))  if processor_scope.const_defined?('Configuration') if processor_scope.const_defined?('Configuration')
   end
 
   def self.pg_extension_installed?(extension)
@@ -28,24 +31,17 @@ module Mincer
     @installed_extensions[extension.to_sym]
   end
 
-  def self.configure
-    @config = yield(config)
-  end
-
-  def self.config
-    @config || Config.new
-  end
-
 end
 
 
 # Loading processors
 require 'mincer/processors/sorting/processor'
 require 'mincer/processors/pagination/processor'
-require 'mincer/processors/pg_search/search_engine'
-require 'mincer/processors/pg_search/array_search'
-require 'mincer/processors/pg_search/fulltext_search'
-require 'mincer/processors/pg_search/trigram_search'
+require 'mincer/processors/pg_search/search_column'
+require 'mincer/processors/pg_search/search_engines/base'
+require 'mincer/processors/pg_search/search_engines/array'
+require 'mincer/processors/pg_search/search_engines/fulltext'
+require 'mincer/processors/pg_search/search_engines/trigram'
 require 'mincer/processors/pg_search/processor'
 require 'mincer/processors/cache_digest/processor'
 require 'mincer/processors/pg_json_dumper/processor'

@@ -1,18 +1,16 @@
-# Heavily influenced by pg_search(https://github.com/Casecommons/pg_search)
+# This and all processors are heavily influenced by pg_search(https://github.com/Casecommons/pg_search)
 module Mincer
   module Processors
     module PgSearch
       class Processor
-        include ActiveSupport::Configurable
-        config_accessor :param_name, :fulltext_engine, :trigram_engine, :array_engine
 
         def initialize(mincer)
           @mincer, @args, @relation = mincer, mincer.args, mincer.relation
         end
 
         def apply
-          if Mincer.postgres? && @args['pattern'].present?
-            @relation = apply_pg_search(@relation, @args['pattern'])
+          if Mincer.postgres? && @args[param_name].present?
+            @relation = apply_pg_search(@relation, @args[param_name])
           else
             @relation
           end
@@ -23,29 +21,57 @@ module Mincer
         end
 
         def conditions(pattern)
-          pg_search_options = default_options.merge(@mincer.send(:pg_search_options))
-          pg_search_options[:columns] ||= default_columns
-          features = []
-          features << Mincer::PgSearch::FulltextSearch.new(pattern, pg_search_options)
-          features << Mincer::PgSearch::ArraySearch.new(pattern, pg_search_options) if pg_search_options[:array_columns]
-          features << Mincer::PgSearch::TrigramSearch.new(pattern, pg_search_options) if pg_search_options[:trigram]
-
-          features.map do |feature|
-            feature.conditions
+          pg_search_engines(pattern).map do |pg_search_engine|
+            pg_search_engine.conditions
           end.inject do |accumulator, expression|
             Arel::Nodes::Or.new(accumulator, expression)
           end.to_sql
         end
 
-        def default_columns
+        def pg_search_engines(pattern)
+          [
+              Mincer::PgSearch::SearchEngines::Fulltext,
+              #Mincer::PgSearch::SearchEngines::Array,
+              #Mincer::PgSearch::SearchEngines::Trigram
+          ].map do |engine_class|
+            engine_class.new(pattern, columns)
+          end
+        end
+
+        def columns
+          @columns ||= columns_in_options? ? search_columns : default_search_columns
+        end
+
+        def search_columns
+          Array.wrap(options).each_with_object([]) do |option, search_columns|
+            option.delete(:columns).each do |column|
+              search_columns << SearchColumn.new(full_name: column, options: option)
+            end
+          end
+        end
+
+        # We use only text/string columns and avoid array
+        def default_search_columns
           table_name = @relation.table_name
-          @relation.columns.map { |column| "#{table_name}.#{column.name}" if [:string, :text].include?(column.type) && !column.array }.compact
+          @relation.columns.reject do |column|
+            ![:string, :text].include?(column.type) || column.array
+          end.map do |column|
+            SearchColumn.new(full_name: "#{table_name}.#{column.name}", options: ::Mincer.config.pg_search.fulltext_engine.merge(engines: [:fulltext]))
+          end
         end
 
-        def default_options
-          { ignore_accent: true }
+        def options
+          @mincer.send(:pg_search_options)
         end
 
+        def columns_in_options?
+          return false if options.empty?
+          Array.wrap(options).all? { |option| option[:columns].present? && option[:columns].any? }
+        end
+
+        def param_name
+          Mincer.config.pg_search.param_name
+        end
       end
 
       module Options
@@ -65,6 +91,23 @@ module Mincer
           @pg_search_options ||= {}
         end
       end
+
+      class Configuration
+        include ActiveSupport::Configurable
+        config_accessor :param_name do
+          'pattern'
+        end
+        config_accessor :fulltext_engine do
+          { ignore_accent: true, any_word: false, dictionary: :simple }
+        end
+        config_accessor :trigram_engine do
+          { ignore_accent: true, threshold: 0.3 }
+        end
+        config_accessor :array_engine do
+          { ignore_accent: true, any_word: true }
+        end
+      end
+
     end
   end
 end

@@ -37,7 +37,8 @@ end
 # Loading processors
 require 'mincer/processors/sorting/processor'
 require 'mincer/processors/pagination/processor'
-require 'mincer/processors/pg_search/search_column'
+require 'mincer/processors/pg_search/search_statement'
+require 'mincer/processors/pg_search/sanitizer'
 require 'mincer/processors/pg_search/search_engines/base'
 require 'mincer/processors/pg_search/search_engines/array'
 require 'mincer/processors/pg_search/search_engines/fulltext'

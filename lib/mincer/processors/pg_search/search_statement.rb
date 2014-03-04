@@ -16,6 +16,10 @@ module Mincer
           options[:dictionary] || Mincer.config.pg_search.fulltext_engine[:dictionary]
         end
 
+        def threshold
+          options[:threshold] || Mincer.config.pg_search.trigram_engine[:threshold]
+        end
+
       end
     end
   end

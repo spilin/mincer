@@ -35,13 +35,17 @@ describe ::Mincer::Configuration do
         Mincer.config.pg_search.fulltext_engine[:dictionary].should == :simple
       end
 
+      it 'sets "ignore_case" to "false" as default value' do
+        Mincer.config.pg_search.fulltext_engine[:ignore_case].should be_false
+      end
+
       it 'sets fulltext_engine options while merging with defaults' do
         Mincer.configure do |config|
           config.pg_search do |search|
             search.fulltext_engine = search.fulltext_engine.merge(ignore_accent: false)
           end
         end
-        Mincer.config.pg_search.fulltext_engine.should == { ignore_accent: false, any_word: false, dictionary: :simple }
+        Mincer.config.pg_search.fulltext_engine.should == { ignore_accent: false, any_word: false, dictionary: :simple, ignore_case: false }
       end
     end
 

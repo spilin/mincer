@@ -22,6 +22,10 @@ module Mincer
           ::Mincer::Processors::PgSearch::Sanitizer.sanitize_string(term, sanitizers)
         end
 
+        def sanitize_string_quoted(term, sanitizers)
+          ::Mincer::Processors::PgSearch::Sanitizer.sanitize_string_quoted(term, sanitizers)
+        end
+
       end
     end
   end

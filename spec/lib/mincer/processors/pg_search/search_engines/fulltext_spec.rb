@@ -31,37 +31,50 @@ describe ::Mincer::PgSearch::SearchEngines::Fulltext do
     it 'generates search condition with one column, one term and no options' do
       search_statement1 = search_statement_class.new(['"records"."text"'], engines: [:fulltext])
       search_engine = search_engine_class.new('search', [search_statement1])
-      search_engine.conditions.should == %{(((to_tsvector('simple', "records"."text")) @@ (to_tsquery('simple', concat('search')))))}
+      search_engine.conditions.should == %{(((to_tsvector('simple', "records"."text")) @@ (to_tsquery('simple', 'search'))))}
     end
 
     it 'generates search condition with two columns, one term and no options' do
       search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:fulltext])
       search_engine = search_engine_class.new('search', [search_statement1])
-      search_engine.conditions.should == %{(((to_tsvector('simple', "records"."text") || to_tsvector('simple', "records"."text2")) @@ (to_tsquery('simple', concat('search')))))}
+      search_engine.conditions.should == %{(((to_tsvector('simple', "records"."text") || to_tsvector('simple', "records"."text2")) @@ (to_tsquery('simple', 'search'))))}
     end
 
     it 'generates search condition with two columns, two terms and no options' do
       search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:fulltext])
       search_engine = search_engine_class.new('search word', [search_statement1])
-      search_engine.conditions.should == %{(((to_tsvector('simple', "records"."text") || to_tsvector('simple', "records"."text2")) @@ (to_tsquery('simple', concat('search') || ' & ' || concat('word')))))}
+      search_engine.conditions.should == %{(((to_tsvector('simple', "records"."text") || to_tsvector('simple', "records"."text2")) @@ (to_tsquery('simple', 'search' || ' & ' || 'word'))))}
     end
 
     it 'generates search condition with two columns, two terms and option "any_word" set to true ' do
       search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:fulltext], any_word: true)
       search_engine = search_engine_class.new('search word', [search_statement1])
-      search_engine.conditions.should == %{(((to_tsvector('simple', "records"."text") || to_tsvector('simple', "records"."text2")) @@ (to_tsquery('simple', concat('search') || ' | ' || concat('word')))))}
+      search_engine.conditions.should == %{(((to_tsvector('simple', "records"."text") || to_tsvector('simple', "records"."text2")) @@ (to_tsquery('simple', 'search' || ' | ' || 'word'))))}
     end
 
     it 'generates search condition with two columns, two terms and option "ignore_accent" set to true ' do
       search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:fulltext], ignore_accent: true)
       search_engine = search_engine_class.new('search word', [search_statement1])
-      search_engine.conditions.should == %{(((to_tsvector('simple', unaccent("records"."text")) || to_tsvector('simple', unaccent("records"."text2"))) @@ (to_tsquery('simple', unaccent(concat('search')) || ' & ' || unaccent(concat('word'))))))}
+      search_engine.conditions.should == %{(((to_tsvector('simple', unaccent("records"."text")) || to_tsvector('simple', unaccent("records"."text2"))) @@ (to_tsquery('simple', unaccent('search') || ' & ' || unaccent('word')))))}
+    end
+
+    it 'generates search condition with two columns, two terms and option "ignore_accent" and "ignore_case" set to true ' do
+      search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:fulltext], ignore_accent: true, ignore_case: true)
+      search_engine = search_engine_class.new('search word', [search_statement1])
+      search_engine.conditions.should == %{(((to_tsvector('simple', unaccent(lower("records"."text"))) || to_tsvector('simple', unaccent(lower("records"."text2")))) @@ (to_tsquery('simple', unaccent(lower('search')) || ' & ' || unaccent(lower('word'))))))}
     end
 
     it 'generates search condition with one column, one term and option "dictionary" set to :english' do
       search_statement1 = search_statement_class.new(['"records"."text"'], engines: [:fulltext], dictionary: :english)
       search_engine = search_engine_class.new('search', [search_statement1])
-      search_engine.conditions.should == %{(((to_tsvector('english', "records"."text")) @@ (to_tsquery('english', concat('search')))))}
+      search_engine.conditions.should == %{(((to_tsvector('english', "records"."text")) @@ (to_tsquery('english', 'search'))))}
+    end
+
+    it 'generates search condition with two search statements one column, one term and no options' do
+      search_statement1 = search_statement_class.new(['"records"."text"'], engines: [:fulltext])
+      search_statement2 = search_statement_class.new(['"records"."text2"'], engines: [:fulltext])
+      search_engine = search_engine_class.new('search', [search_statement1, search_statement2])
+      search_engine.conditions.should == %{(((to_tsvector('simple', "records"."text")) @@ (to_tsquery('simple', 'search'))) OR ((to_tsvector('simple', "records"."text2")) @@ (to_tsquery('simple', 'search'))))}
     end
 
   end

@@ -3,23 +3,26 @@ module Mincer
     module PgSearch
       class Sanitizer
         AVAILABLE_SANITIZERS = [:ignore_case, :ignore_accent, :coalesce]
-        attr_accessor :term, :sanitizers, :sanitized_term
+        attr_accessor :term, :sanitizers
 
-        def initialize(term, sanitizers)
-          @term, @sanitizers = term, sanitizers
+        def initialize(term, *sanitizers)
+          @term, @sanitizers = term, Array.wrap(sanitizers).flatten & AVAILABLE_SANITIZERS
         end
 
         def sanitize_column
           @sanitized_column ||= sanitize(Arel.sql(@term))
         end
 
-        def sanitize_string
-          @sanitized_string ||= sanitize(Arel::Nodes::NamedFunction.new('concat', [@term])).to_sql
+        def sanitize_string(options = {})
+          if sanitizers.empty?
+            return options[:quote] ? Mincer.connection.quote(@term) : @term
+          end
+          @sanitized_string ||= sanitize(@term)
         end
 
         def sanitize(node)
           sanitizers.inject(node) do |query, sanitizer|
-            query = self.class.send(sanitizer, query) if AVAILABLE_SANITIZERS.include?(sanitizer)
+            query = self.class.send(sanitizer, query)
             query
           end
         end
@@ -30,6 +33,10 @@ module Mincer
 
         def self.sanitize_string(term, *sanitizers)
           new(term, *sanitizers).sanitize_string
+        end
+
+        def self.sanitize_string_quoted(term, *sanitizers)
+          new(term, *sanitizers).sanitize_string(quote: true)
         end
 
         def self.ignore_case(term)

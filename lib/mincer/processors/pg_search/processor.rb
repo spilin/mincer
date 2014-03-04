@@ -98,7 +98,7 @@ module Mincer
           'pattern'
         end
         config_accessor :fulltext_engine do
-          { ignore_accent: true, any_word: false, dictionary: :simple }
+          { ignore_accent: true, any_word: false, dictionary: :simple, ignore_case: false }
         end
         config_accessor :trigram_engine do
           { ignore_accent: true, threshold: 0.3 }

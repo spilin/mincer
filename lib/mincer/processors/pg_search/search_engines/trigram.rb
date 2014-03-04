@@ -4,34 +4,32 @@ module Mincer
       class Trigram < Base
 
         def conditions
-          Arel::Nodes::Grouping.new(similarities_condition)
+          arel_group do
+            search_engine_statements.map do |search_statement|
+              document_for(search_statement)
+            end.inject do |accumulator, expression|
+              Arel::Nodes::Or.new(accumulator, expression)
+            end
+          end.to_sql
         end
 
         private
 
-        attr_reader :pattern, :options, :columns
+        def search_engine_statements
+          @search_engine_statements ||= self.search_statements.select do |search_statement|
+            search_statement.options[:engines].try(:include?, :trigram)
+          end
+        end
 
-        def similarities_condition
-          columns.map do |search_column|
-            similarity(search_column).gteq(options[:trigram][:threshold] || DEFAULT_THRESHOLD)
+        def document_for(search_statement)
+          search_statement.columns.map do |search_column|
+            similarity = Arel::Nodes::NamedFunction.new('similarity', [sanitize_column(search_column, search_statement.sanitizers), sanitize_string(pattern, search_statement.sanitizers)])
+            arel_group(similarity.gteq(search_statement.threshold))
           end.inject do |accumulator, expression|
             Arel::Nodes::Or.new(accumulator, expression)
           end
         end
 
-        def similarity(column)
-          Arel::Nodes::Grouping.new(
-              Arel::Nodes::NamedFunction.new('similarity', [normalized_pattern, normalized_column(column)])
-          )
-        end
-
-        def normalized_pattern
-          Arel.sql(normalize(Mincer.connection.quote(pattern)))
-        end
-
-        def normalized_column(column)
-          Arel::Nodes::Grouping.new(Arel.sql(normalize(column)))
-        end
       end
     end
   end

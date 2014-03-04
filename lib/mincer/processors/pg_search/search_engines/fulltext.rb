@@ -30,7 +30,7 @@ module Mincer
         def query_for(pattern, search_statement)
           terms_delimiter = search_statement.options[:any_word] ? '|' : '&'
           terms = pattern.gsub(DISALLOWED_TSQUERY_CHARACTERS, ' ').split(' ').compact
-          tsquery_sql = Arel.sql(terms.map { |term| sanitize_string(term, search_statement.sanitizers) }.join(" || ' #{terms_delimiter} ' || "))
+          tsquery_sql = Arel.sql(terms.map { |term| sanitize_string_quoted(term, search_statement.sanitizers).to_sql }.join(" || ' #{terms_delimiter} ' || "))
           Arel::Nodes::NamedFunction.new('to_tsquery', [search_statement.dictionary, tsquery_sql]).to_sql
         end
 

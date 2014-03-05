@@ -8,6 +8,16 @@ describe ::Mincer::Processors::Sorting::Processor do
     %w{a c b}.each { |i| ActiveRecordModel.create(text: i) }
   end
 
+  describe 'config' do
+    it 'defines method with pg_options' do
+      subject = Class.new(Mincer::Base) do
+        pg_search [{ columns: %w{"active_record_models"."tags" }, engines: [:array] }]
+      end
+      query = subject.new(ActiveRecordModel)
+      query.send(:pg_search_options).should == [{ columns: %w{"active_record_models"."tags" }, engines: [:array] }]
+    end
+  end
+
   describe 'sorting with basic model without any Mincer::Base configuration' do
     subject(:model) do
       Class.new(Mincer::Base)

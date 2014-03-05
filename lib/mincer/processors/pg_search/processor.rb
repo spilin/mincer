@@ -80,6 +80,14 @@ module Mincer
           def skip_search!
             skip_pg_search!
           end
+
+          def pg_search(params)
+            class_eval <<-OPTIONS
+              def pg_search_options
+                @pg_search_options ||= #{params.inspect}
+              end
+            OPTIONS
+          end
         end
 
         def pg_search_options

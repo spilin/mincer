@@ -2,11 +2,11 @@ module Mincer
   module Processors
     module PgSearch
       class Sanitizer
-        AVAILABLE_SANITIZERS = [:ignore_case, :ignore_accent, :coalesce]
+        AVAILABLE_SANITIZERS = [:coalesce, :ignore_case, :ignore_accent]
         attr_accessor :term, :sanitizers
 
         def initialize(term, *sanitizers)
-          @term, @sanitizers = term, Array.wrap(sanitizers).flatten & AVAILABLE_SANITIZERS
+          @term, @sanitizers = term, AVAILABLE_SANITIZERS & Array.wrap(sanitizers).flatten
         end
 
         def sanitize_column

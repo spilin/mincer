@@ -20,7 +20,7 @@ describe ::Mincer::Processors::PgSearch::Sanitizer do
     end
 
     it 'applies multiple sanitizers' do
-      subject.sanitize_string('text', :ignore_case, :ignore_accent, :coalesce).to_sql.should == "coalesce(unaccent(lower('text')), '')"
+      subject.sanitize_string('text', :ignore_case, :ignore_accent, :coalesce).to_sql.should == "unaccent(lower(coalesce('text', '')))"
     end
   end
 

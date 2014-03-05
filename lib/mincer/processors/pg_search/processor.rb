@@ -23,50 +23,45 @@ module Mincer
         def conditions(pattern)
           pg_search_engines(pattern).map do |pg_search_engine|
             pg_search_engine.conditions
-          end.inject do |accumulator, expression|
+          end.compact.inject do |accumulator, expression|
             Arel::Nodes::Or.new(accumulator, expression)
           end.to_sql
         end
 
         def pg_search_engines(pattern)
-          [
-              Mincer::PgSearch::SearchEngines::Fulltext,
-              #Mincer::PgSearch::SearchEngines::Array,
-              #Mincer::PgSearch::SearchEngines::Trigram
-          ].map do |engine_class|
-            engine_class.new(pattern, columns)
+          Mincer.config.pg_search.engines.map do |engine_class|
+            engine_class.new(pattern, search_statements)
           end
         end
 
-        def columns
-          @columns ||= columns_in_options? ? search_columns : default_search_columns
+        def search_statements
+          @search_statements ||= options.any? { |option| option.any? } ? search_statements_from_options : default_search_statements
         end
 
-        def search_columns
-          Array.wrap(options).each_with_object([]) do |option, search_columns|
-            option.delete(:columns).each do |column|
-              search_columns << SearchColumn.new(full_name: column, options: option)
-            end
+        def search_statements_from_options
+          options.map do |option|
+            SearchStatement.new(option.delete(:columns), search_statement_default_options(option[:engines]).merge(option))
           end
         end
 
         # We use only text/string columns and avoid array
-        def default_search_columns
-          table_name = @relation.table_name
-          @relation.columns.reject do |column|
+        def default_search_statements
+          column_names = @relation.columns.reject do |column|
             ![:string, :text].include?(column.type) || column.array
           end.map do |column|
-            SearchColumn.new(full_name: "#{table_name}.#{column.name}", options: ::Mincer.config.pg_search.fulltext_engine.merge(engines: [:fulltext]))
+            "#{@relation.table_name}.#{column.name}"
           end
+          [SearchStatement.new(column_names, search_statement_default_options([:fulltext]).merge(engines: [:fulltext]))]
         end
 
         def options
-          @mincer.send(:pg_search_options)
+          Array.wrap(@mincer.send(:pg_search_options))
         end
 
-        def columns_in_options?
-          return false if options.empty?
-          Array.wrap(options).all? { |option| option[:columns].present? && option[:columns].any? }
+        def search_statement_default_options(engines)
+          (engines & [:fulltext, :trigram, :array]).each_with_object({}) do |engine, options|
+            options.merge!(Mincer.config.pg_search.send("#{engine}_engine"))
+          end
         end
 
         def param_name
@@ -105,6 +100,9 @@ module Mincer
         end
         config_accessor :array_engine do
           { ignore_accent: true, any_word: true }
+        end
+        config_accessor :engines do
+          [Mincer::PgSearch::SearchEngines::Fulltext, Mincer::PgSearch::SearchEngines::Array, Mincer::PgSearch::SearchEngines::Trigram]
         end
       end
 

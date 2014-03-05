@@ -9,7 +9,7 @@ module Mincer
         end
 
         def sanitizers
-          @sanitizers ||= Sanitizer::AVAILABLE_SANITIZERS.select {|sanitizer| options[sanitizer] }
+          @sanitizers ||= Sanitizer::AVAILABLE_SANITIZERS.select { |sanitizer| options[sanitizer] }
         end
 
         def dictionary

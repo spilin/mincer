@@ -31,38 +31,38 @@ describe ::Mincer::PgSearch::SearchEngines::Array do
     it 'generates search condition with one column, one term and no options' do
       search_statement1 = search_statement_class.new(['"records"."text"'], engines: [:array])
       search_engine = search_engine_class.new('search', [search_statement1])
-      search_engine.conditions.should == %{(("records"."text") @> ARRAY['search'])}
+      search_engine.conditions.to_sql.should == %{(("records"."text") @> ARRAY['search'])}
     end
 
     it 'generates search condition with two columns, one term and no options' do
       search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:array])
       search_engine = search_engine_class.new('search', [search_statement1])
-      search_engine.conditions.should == %{(("records"."text" || "records"."text2") @> ARRAY['search'])}
+      search_engine.conditions.to_sql.should == %{(("records"."text" || "records"."text2") @> ARRAY['search'])}
     end
 
     it 'generates search condition with two columns, two terms and no options' do
       search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:array])
       search_engine = search_engine_class.new('search word', [search_statement1])
-      search_engine.conditions.should == %{(("records"."text" || "records"."text2") @> ARRAY['search','word'])}
+      search_engine.conditions.to_sql.should == %{(("records"."text" || "records"."text2") @> ARRAY['search','word'])}
     end
 
     it 'generates search condition with two columns, two terms and option "ignore_accent" set to true ' do
       search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:array], ignore_accent: true)
       search_engine = search_engine_class.new('search word', [search_statement1])
-      search_engine.conditions.should == %{(("records"."text" || "records"."text2") @> ARRAY[unaccent('search'),unaccent('word')])}
+      search_engine.conditions.to_sql.should == %{(("records"."text" || "records"."text2") @> ARRAY[unaccent('search'),unaccent('word')])}
     end
 
     #TODO: sanitizer can not be set on array columns since we ned to unpack an reconstruct those arrays. Find a solution
     it 'generates search condition with two columns, two terms and option "any_word" set to true ' do
       search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:array], any_word: true)
       search_engine = search_engine_class.new('search word', [search_statement1])
-      search_engine.conditions.should == %{(("records"."text" || "records"."text2") && ARRAY['search','word'])}
+      search_engine.conditions.to_sql.should == %{(("records"."text" || "records"."text2") && ARRAY['search','word'])}
     end
 
     it 'generates search condition with two columns, two terms and option "ignore_accent" and "ignore_case" set to true ' do
       search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:array], ignore_accent: true, ignore_case: true)
       search_engine = search_engine_class.new('search word', [search_statement1])
-      search_engine.conditions.should == %{(("records"."text" || "records"."text2") @> ARRAY[unaccent(lower('search')),unaccent(lower('word'))])}
+      search_engine.conditions.to_sql.should == %{(("records"."text" || "records"."text2") @> ARRAY[unaccent(lower('search')),unaccent(lower('word'))])}
     end
   end
 

@@ -4,13 +4,14 @@ module Mincer
       class Trigram < Base
 
         def conditions
+          return nil if search_engine_statements.empty?
           arel_group do
             search_engine_statements.map do |search_statement|
               document_for(search_statement)
             end.inject do |accumulator, expression|
               Arel::Nodes::Or.new(accumulator, expression)
             end
-          end.to_sql
+          end
         end
 
         private

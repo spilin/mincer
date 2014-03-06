@@ -66,40 +66,34 @@ describe ::Mincer::Processors::PgSearch::Processor do
               ActiveRecordModel.create!(text: 'Bingo', tags: ['b', 'c'])
             end
 
-            it 'includes 2 items when both matched with array overlap(&&)' do
+            it 'includes 2 items when both items include pattern' do
               subject = Class.new(Mincer::Base) do
-                def pg_search_options
-                  [{ :columns => %w{"active_record_models"."tags" }, engines: [:array] }]
-                end
+                pg_search [{ :columns => %w{"active_record_models"."tags" }, engines: [:array] }]
               end
               query = subject.new(ActiveRecordModel, { 'pattern' => 'b' })
               query.to_a.count.should eq(2)
             end
 
-            it 'includes 1 item when match was found on one item with array overlap(&&)' do
+            it 'includes 1 item when match was found on one item' do
               subject = Class.new(Mincer::Base) do
-                def pg_search_options
-                  [{ :columns => %w{"active_record_models"."tags" }, engines: [:array] }]
-                end
+                pg_search [{ :columns => %w{"active_record_models"."tags" }, engines: [:array] }]
               end
               query = subject.new(ActiveRecordModel, { 'pattern' => 'c' })
               query.to_a.count.should eq(1)
             end
 
-            it 'includes both when matched with array overlap(&&)' do
+            it 'includes both when matched with array overlap and option "any_word" set to true' do
               subject = Class.new(Mincer::Base) do
-                def pg_search_options
-                  [{ :columns => %w{"active_record_models"."tags" }, engines: [:array] }]
-                end
+                pg_search [{ :columns => %w{"active_record_models"."tags" }, engines: [:array], any_word: true }]
               end
               query = subject.new(ActiveRecordModel, { 'pattern' => 'a c d' })
               query.to_a.count.should eq(2)
             end
 
-            it 'includes both when matched with array overlap(&&)(separated with ",")' do
+            it 'includes both when matched with array overlap and option "any_word" set to true(separated with ",")' do
               subject = Class.new(Mincer::Base) do
                 def pg_search_options
-                  [{ :columns => %w{"active_record_models"."tags" }, engines: [:array] }]
+                  [{ :columns => %w{"active_record_models"."tags"}, engines: [:array], any_word: true }]
                 end
               end
               query = subject.new(ActiveRecordModel, { 'pattern' => 'a, c,d' })

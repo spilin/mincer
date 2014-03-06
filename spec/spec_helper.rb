@@ -4,6 +4,10 @@
 # loaded once.
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
+
+# Disabling logging
+#$stderr = StringIO.new
+
 require 'simplecov'
 SimpleCov.start do
   add_filter 'spec'

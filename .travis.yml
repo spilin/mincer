@@ -7,6 +7,8 @@ rvm:
 before_script:
   - psql -c 'create database mincer;' -U postgres
   - psql -d mincer -c 'CREATE EXTENSION IF NOT EXISTS pgcrypto;' -U postgres
+  - psql -d mincer -c 'CREATE EXTENSION IF NOT EXISTS unaccent;' -U postgres
+  - psql -d mincer -c 'CREATE EXTENSION IF NOT EXISTS pg_trgm;' -U postgres
 
 addons:
   postgresql: "9.3"

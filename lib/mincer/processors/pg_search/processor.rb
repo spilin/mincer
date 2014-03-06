@@ -59,8 +59,9 @@ module Mincer
         end
 
         def search_statement_default_options(engines)
-          (engines & [:fulltext, :trigram, :array]).each_with_object({}) do |engine, options|
-            options.merge!(Mincer.config.pg_search.send("#{engine}_engine"))
+          (engines & [:fulltext, :trigram, :array]).inject({}) do |options, engine|
+            options = Mincer.config.pg_search.send("#{engine}_engine").merge(options)
+            options
           end
         end
 

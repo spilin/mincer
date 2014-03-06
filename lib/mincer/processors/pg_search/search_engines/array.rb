@@ -26,7 +26,7 @@ module Mincer
         def document_for(search_statement)
           arel_group do
             search_statement.columns.map do |search_column|
-              Arel.sql(search_column)
+              Arel.sql(search_column + '::text[]')
             end.inject do |accumulator, expression|
               Arel::Nodes::InfixOperation.new('||', accumulator, expression)
             end

@@ -52,6 +52,12 @@ describe ::Mincer::PgSearch::SearchEngines::Fulltext do
       search_engine.conditions.to_sql.should == %{(((to_tsvector('simple', coalesce("records"."text", '')) || to_tsvector('simple', coalesce("records"."text2", ''))) @@ (to_tsquery('simple', 'search' || ' | ' || 'word'))))}
     end
 
+    it 'generates search condition with two columns, two terms and option "any_word" set to true while escaping special characters' do
+      search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:fulltext], any_word: true)
+      search_engine = search_engine_class.new('search word!(:&|) !', [search_statement1])
+      search_engine.conditions.to_sql.should == %{(((to_tsvector('simple', coalesce("records"."text", '')) || to_tsvector('simple', coalesce("records"."text2", ''))) @@ (to_tsquery('simple', 'search' || ' | ' || 'word'))))}
+    end
+
     it 'generates search condition with two columns, two terms and option "ignore_accent" set to true ' do
       search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:fulltext], ignore_accent: true)
       search_engine = search_engine_class.new('search word', [search_statement1])

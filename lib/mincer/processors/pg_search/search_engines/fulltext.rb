@@ -2,7 +2,7 @@ module Mincer
   module PgSearch
     module SearchEngines
       class Fulltext < Base
-        DISALLOWED_TSQUERY_CHARACTERS = /['?\\:]/
+        DISALLOWED_TSQUERY_CHARACTERS = /[!(:&|)'?\\]/
 
         def conditions
           return nil if search_engine_statements.empty?

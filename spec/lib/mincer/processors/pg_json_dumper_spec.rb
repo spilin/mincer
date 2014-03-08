@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe ::Mincer::Processors::PgJsonDumper do
+describe ::Mincer::Processors::PgJsonDumper::Processor do
   context 'when postgres is used' do
     before do
-      setup_basic_postgres_table
+      setup_postgres_table
       class ActiveRecordModel < ActiveRecord::Base
       end
       ActiveRecordModel.create!(text: 'Test1')

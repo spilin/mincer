@@ -4,6 +4,10 @@
 # loaded once.
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
+
+# Disabling logging
+#$stderr = StringIO.new
+
 require 'simplecov'
 SimpleCov.start do
   add_filter 'spec'
@@ -15,8 +19,6 @@ require 'bundler/setup'
 require 'active_record'
 require 'kaminari'
 Kaminari::Hooks.init
-require 'textacular'
-ActiveRecord::Base.extend(Textacular)
 require 'mincer'
 
 require 'support/postgres_adapter'

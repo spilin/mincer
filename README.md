@@ -9,7 +9,7 @@ Mincer is an ActiveRecord::Relation wrapper that applies usefull features to you
 [Sort](#sort)
 [Search](#search)
 [Dump to Json(Using postgres >= 9.2)](#json)
-[Generate digest(usefull for caching)](#digest)
+[Generate digest(useful for caching)](#digest)
 
 
 ## Installation
@@ -62,16 +62,18 @@ Lets create class EmployeesListQuery class that will inherit from Mincer::Base, 
     <% end %>
 
 
-Now lets's look what more can we do with this object
+Now lets look what more can we do with this object
 
 <a name="pagination"/>
 ### Pagination
-Mincer supports [kaminari](https://github.com/amatsuda/kaminari) and [will_paginate](https://github.com/mislav/will_paginate). In order to use pagination you need to include one of them
+Mincer supports [kaminari](https://github.com/amatsuda/kaminari) and [will_paginate](https://github.com/mislav/will_paginate).
+In order to use pagination you need to include one of them
 in your `Gemfile`. Example of using pagination
 
     employees = EmployeesListQuery.new(Employee, {'page' => 2, 'per_page' => 10})
 
-By default all `Micner` objects will use pagination, even if no arguments are passed. To set default values for pagination please refer to `kaminari` or `will_paginate` documentation.
+By default all `Mincer` objects will use pagination, even if no arguments are passed.
+To set default values for pagination please refer to `kaminari` or `will_paginate` documentation.
 
 To disable pagination you can use class method `skip_pagination!`:
 
@@ -166,28 +168,55 @@ Example of usage in HAML:
         %li{ :class => (sort_class_for employees, 'company_name') }
             = link_to 'Company', sort_url_for(employees, 'company_name')
 
-In this example `li` will receive `class="sorted order_down"` or `class="sorted order_up"` if this attribue was used for search.
-Generated url will be enchanced with `sort` and `order` attributes.
+In this example `li` will receive `class="sorted order_down"` or `class="sorted order_up"` if this attribute was used for search.
+Generated url will be enhanced with `sort` and `order` attributes.
 
 <a name="search"/>
 ### Search
 
-Currently Mincer uses [Textacular](https://github.com/textacular/textacular) for search. This sets alot of restrictions:
-1. Works only with postgres
-2. You have to include `textacular` to your Gemfile
-3. You have to install postgres extension that [Textacular](https://github.com/textacular/textacular) uses for searching.
+Mincer borrowed allot of search logic from [PgSearch](https://github.com/Casecommons/pg_search).
+Currently search only works with postgres.
 
 Example of usage:
 
     employees = EmployeesListQuery.new(Employee, {'pattern' => 'whatever'})
 
-It will use `simple_search`, and if it will return no entries Mincer will run `fuzzy_search`. For more details on what
-is the difference between them, plese look refer to `textacular` github [page](https://github.com/textacular/textacular).
+By default search will be performed on all text/string columns of current model. If you want to explicitly set searchable columns
+you can override `pg_search_options`:
+
+  def pg_search_options
+    { :columns => %w{employees.full_name companies.name} }
+  end
+
+By default search will use [unaccent] to ignore accent marks. You can read more about `unaccent` [here](http://www.postgresql.org/docs/current/static/unaccent.html)
+You need to enable `unaccent` extension. If you use Rails, please use migration for that:
+
+    enable_extension 'unaccent'
+
+or run `CREATE EXTENSION IF NOT EXISTS unaccent;`
+
+If by any chance you need to disable `unaccent`:
+
+  def pg_search_options
+    { :ignore_accent => false }
+  end
+
+If you will set `any_word` attribute to true - search will return all items containing any word in the search terms.
+
+  def pg_search_options
+    { :any_word => true }
+  end
+
+If you will set `ignore_case` attribute to true - search will ignore case.
+
+  def pg_search_options
+    { :ignore_case => true }
+  end
 
 <a name="json"/>
 ### JSON generation
 
-Mincer allowes you to dump query result to JSON using [Postgres JSON Functions](http://www.postgresql.org/docs/9.3/static/functions-json.html)
+Mincer allows you to dump query result to JSON using [Postgres JSON Functions](http://www.postgresql.org/docs/9.3/static/functions-json.html)
 Didn't had time to do benchmarking, but it's extremely fast.
 
 Pros:
@@ -217,7 +246,7 @@ In addition you can pass option `root` to `to_json` method if you need to includ
 <a name="digest"/>
 ### Digest
 
-Digest is very usefull for cache invalidation on your views when you are using custom queries. We will modify a bit example:
+Digest is very useful for cache invalidation on your views when you are using custom queries. We will modify a bit example:
 
     class EmployeesListQuery < Mincer::Base
         digest! %w{employee_updated_at company_updated_at}

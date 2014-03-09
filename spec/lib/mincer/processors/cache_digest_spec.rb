@@ -4,8 +4,6 @@ describe ::Mincer::Processors::CacheDigest::Processor do
   context 'when postgres used' do
     before do
       setup_postgres_table
-      class ActiveRecordModel < ActiveRecord::Base
-      end
       ActiveRecordModel.create!(text: 'Test1')
       ActiveRecordModel.create!(text: 'Test2')
     end

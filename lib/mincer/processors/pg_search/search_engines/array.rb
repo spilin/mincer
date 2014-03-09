@@ -4,24 +4,21 @@ module Mincer
       class Array < Base
 
         def conditions
-          return nil if search_engine_statements.empty?
+          prepare_search_statements
+          return nil unless search_engine_statements_valid?
           arel_group do
             search_engine_statements.map do |search_statement|
-              terms_delimiter = search_statement.options[:any_word] ? '&&' : '@>'
-              Arel::Nodes::InfixOperation.new(terms_delimiter, document_for(search_statement), query_for(pattern, search_statement))
-            end.inject do |accumulator, expression|
+              if search_statement.extract_pattern_from(args)
+                terms_delimiter = search_statement.options[:any_word] ? '&&' : '@>'
+                arel_group(Arel::Nodes::InfixOperation.new(terms_delimiter, document_for(search_statement), query_for(search_statement)))
+              end
+            end.compact.inject do |accumulator, expression|
               Arel::Nodes::Or.new(accumulator, expression)
             end
           end
         end
 
         private
-
-        def search_engine_statements
-          @search_engine_statements ||= self.search_statements.select do |search_statement|
-            search_statement.options[:engines].try(:include?, :array)
-          end
-        end
 
         def document_for(search_statement)
           arel_group do
@@ -33,8 +30,8 @@ module Mincer
           end
         end
 
-        def query_for(pattern, search_statement)
-          normalized_pattern = pattern.split(%r{\s|,}).uniq.reject(&:empty?).map do |item|
+        def query_for(search_statement)
+          normalized_pattern = search_statement.pattern.split(%r{\s|,}).uniq.reject(&:empty?).map do |item|
             sanitize_string_quoted(item, search_statement.sanitizers).to_sql
           end.join(',')
           Arel.sql("ARRAY[#{normalized_pattern}]")

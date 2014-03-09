@@ -3,8 +3,6 @@ require 'spec_helper'
 describe ::Mincer::Processors::Pagination::Processor do
   before do
     setup_basic_sqlite3_table
-    class ActiveRecordModel < ActiveRecord::Base
-    end
     30.times { |i| ActiveRecordModel.create(text: i) }
   end
 

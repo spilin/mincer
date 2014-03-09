@@ -4,9 +4,6 @@ describe ::Mincer::Processors::PgSearch::Processor do
   context 'when postgres used' do
     before do
       setup_postgres_table
-      class ActiveRecordModel < ActiveRecord::Base
-      end
-      ActiveRecordModel.reset_column_information
       ActiveRecordModel.create!(text: 'Test')
       ActiveRecordModel.create!(text: 'Bingo')
       ActiveRecordModel.create!(text: 'Bongo')
@@ -36,15 +33,13 @@ describe ::Mincer::Processors::PgSearch::Processor do
 
           it 'avoids search when pattern is an empty string or spaces' do
             query = subject.new(ActiveRecordModel, { 'pattern' => ' ' })
+
             query.to_a.count.should eq(3)
           end
 
           context 'when another search_column exists with nil value on a found item' do
             before do
               setup_postgres_table([['id', 'SERIAL PRIMARY KEY'], ['text', 'TEXT'], ['text2', 'TEXT']])
-              class ActiveRecordModel < ActiveRecord::Base
-              end
-              ActiveRecordModel.reset_column_information
               ActiveRecordModel.create!(text: 'Test')
               ActiveRecordModel.create!(text: 'Bingo')
             end
@@ -55,13 +50,34 @@ describe ::Mincer::Processors::PgSearch::Processor do
             end
           end
 
+          describe 'searching with 2 statements' do
+            before do
+              setup_postgres_table([['id', 'SERIAL PRIMARY KEY'], ['text', 'TEXT'], ['tags', 'TEXT[]']])
+              ActiveRecordModel.create!(text: 'Test', tags: ['a', 'b'])
+              ActiveRecordModel.create!(text: 'Bingo', tags: ['b', 'c'])
+            end
+
+            it 'searches using 2 statements' do
+              subject = Class.new(Mincer::Base) do
+                pg_search [
+                    { :columns => %w{"active_record_models"."tags" }, engines: [:array] },
+                    { :columns => %w{"active_record_models"."text" }, engines: [:fulltext] }
+                ]
+              end
+              query = subject.new(ActiveRecordModel, { 'pattern' => 'c' })
+              query.to_a.count.should eq(1)
+              query.to_a.first.text.should == 'Bingo'
+
+              query = subject.new(ActiveRecordModel, { 'pattern' => 'Test' })
+              query.to_a.count.should eq(1)
+              query.to_a.first.text.should == 'Test'
+            end
+          end
+
 
           describe 'searching with array' do
             before do
               setup_postgres_table([['id', 'SERIAL PRIMARY KEY'], ['text', 'TEXT'], ['tags', 'TEXT[]']])
-              class ActiveRecordModel < ActiveRecord::Base
-              end
-              ActiveRecordModel.reset_column_information
               ActiveRecordModel.create!(text: 'Test', tags: ['a', 'b'])
               ActiveRecordModel.create!(text: 'Bingo', tags: ['b', 'c'])
             end
@@ -130,8 +146,6 @@ describe ::Mincer::Processors::PgSearch::Processor do
   context 'when postgres is NOT used' do
     before do
       setup_basic_sqlite3_table
-      class ActiveRecordModel < ActiveRecord::Base
-      end
       ActiveRecordModel.create!(text: 'Test')
       ActiveRecordModel.create!(text: 'Bingo')
       ActiveRecordModel.create!(text: 'Bongo')

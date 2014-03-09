@@ -8,7 +8,7 @@ Mincer.configure do |config|
     # ignore_accent - If set to true will ignore accents. Ex.: "Cüåñtô" == "Cuanto". More information: http://www.postgresql.org/docs/current/static/unaccent.html
     # any_word - If set to true, search will return return all items containing any word in the search terms.
     # dictionary - For more information http://www.postgresql.org/docs/current/static/textsearch-dictionaries.html
-    search.fulltext_engine = { ignore_accent: true, any_word: false, dictionary: :simple }
+    search.fulltext_engine = { ignore_accent: true, any_word: false, dictionary: :simple, ignore_case: false }
 
     # Trigram search engine defaults. http://www.postgresql.org/docs/current/static/pgtrgm.html
     # Available options:
@@ -21,6 +21,8 @@ Mincer.configure do |config|
     # ignore_accent - If set to true will ignore accents. Ex.: "Cüåñtô" == "Cuanto". More information: http://www.postgresql.org/docs/current/static/unaccent.html
     # any_word - If set to true, search will return return all items containing any word in the search terms.
     search.array_engine = { ignore_accent: true, any_word: true }
+
+    search.engines = [Mincer::PgSearch::SearchEngines::Fulltext, Mincer::PgSearch::SearchEngines::Array, Mincer::PgSearch::SearchEngines::Trigram]
   end
 
   config.pagination do |pagination|

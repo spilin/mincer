@@ -5,11 +5,12 @@ module Mincer
         DISALLOWED_TSQUERY_CHARACTERS = /[!(:&|)'?\\]/
 
         def conditions
-          return nil if search_engine_statements.empty?
+          prepare_search_statements
+          return nil unless search_engine_statements_valid?
           arel_group do
             search_engine_statements.map do |search_statement|
-              arel_group(Arel::Nodes::InfixOperation.new('@@', document_for(search_statement), query_for(pattern, search_statement)))
-            end.inject do |accumulator, expression|
+              arel_group(Arel::Nodes::InfixOperation.new('@@', document_for(search_statement) , query_for(search_statement)))
+            end.compact.inject do |accumulator, expression|
               Arel::Nodes::Or.new(accumulator, expression)
             end
           end
@@ -17,9 +18,10 @@ module Mincer
 
         private
 
-        def search_engine_statements
-          @search_engine_statements ||= self.search_statements.select do |search_statement|
-            search_statement.options[:engines].try(:include?, :fulltext)
+        def prepare_search_statements
+          search_engine_statements.each do |search_statement|
+            pattern = search_statement.extract_pattern_from(args)
+            search_statement.pattern = pattern && pattern.gsub(DISALLOWED_TSQUERY_CHARACTERS, ' ').split(' ').compact
           end
         end
 
@@ -32,10 +34,9 @@ module Mincer
           end
         end
 
-        def query_for(pattern, search_statement)
+        def query_for(search_statement)
           terms_delimiter = search_statement.options[:any_word] ? '|' : '&'
-          terms = pattern.gsub(DISALLOWED_TSQUERY_CHARACTERS, ' ').split(' ').compact
-          tsquery_sql = Arel.sql(terms.map { |term| sanitize_string_quoted(term, search_statement.sanitizers).to_sql }.join(" || ' #{terms_delimiter} ' || "))
+          tsquery_sql = Arel.sql(search_statement.terms.map { |term| sanitize_string_quoted(term, search_statement.sanitizers).to_sql }.join(" || ' #{terms_delimiter} ' || "))
           arel_group do
             Arel::Nodes::NamedFunction.new('to_tsquery', [search_statement.dictionary, tsquery_sql])
           end

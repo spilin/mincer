@@ -9,38 +9,39 @@ module Mincer
         end
 
         def apply
-          if Mincer.postgres? && @args[param_name].present?
-            @relation = apply_pg_search(@relation, @args[param_name])
+          if Mincer.postgres?
+            @relation = apply_pg_search(@relation, @args)
           else
             @relation
           end
         end
 
-        def apply_pg_search(relation, pattern)
-          relation.where(conditions(pattern))
+        def apply_pg_search(relation, args)
+          relation.where(conditions(args))
         end
 
-        def conditions(pattern)
-          pg_search_engines(pattern).map do |pg_search_engine|
+        def conditions(args)
+          pg_search_engines(args).map do |pg_search_engine|
             pg_search_engine.conditions
           end.compact.inject do |accumulator, expression|
             Arel::Nodes::Or.new(accumulator, expression)
-          end.to_sql
+          end.try(:to_sql)
         end
 
-        def pg_search_engines(pattern)
+        def pg_search_engines(args)
           Mincer.config.pg_search.engines.map do |engine_class|
-            engine_class.new(pattern, search_statements)
+            engine_class.new(args, search_statements)
           end
         end
 
         def search_statements
-          @search_statements ||= options.any? { |option| option.any? } ? search_statements_from_options : default_search_statements
+          @search_statements ||= options.any? { |option| option[:columns] } ? search_statements_from_options : default_search_statements
         end
 
         def search_statements_from_options
           options.map do |option|
-            SearchStatement.new(option.delete(:columns), search_statement_default_options(option[:engines]).merge(option))
+            opt = option.dup
+            SearchStatement.new(opt.delete(:columns), search_statement_default_options(option[:engines]).merge(opt))
           end
         end
 
@@ -63,10 +64,6 @@ module Mincer
             options = Mincer.config.pg_search.send("#{engine}_engine").merge(options)
             options
           end
-        end
-
-        def param_name
-          Mincer.config.pg_search.param_name
         end
       end
 

@@ -30,32 +30,46 @@ describe ::Mincer::PgSearch::SearchEngines::Trigram do
   describe '.conditions' do
     it 'generates search condition with one column, one term and no options' do
       search_statement1 = search_statement_class.new(['"records"."text"'], engines: [:trigram])
-      search_engine = search_engine_class.new('search', [search_statement1])
+      search_engine = search_engine_class.new({ pattern: 'search' }, [search_statement1])
       search_engine.conditions.to_sql.should == %{((similarity("records"."text", 'search') >= 0.3))}
     end
 
     it 'generates search condition with one column, one term and "threshold" option set to 0.5' do
       search_statement1 = search_statement_class.new(['"records"."text"'], engines: [:trigram], threshold: 0.5)
-      search_engine = search_engine_class.new('search', [search_statement1])
+      search_engine = search_engine_class.new({ pattern: 'search' }, [search_statement1])
       search_engine.conditions.to_sql.should == %{((similarity("records"."text", 'search') >= 0.5))}
     end
 
     it 'generates search condition with two columns, one term and no options' do
       search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:trigram])
-      search_engine = search_engine_class.new('search', [search_statement1])
+      search_engine = search_engine_class.new({ pattern: 'search' }, [search_statement1])
       search_engine.conditions.to_sql.should == %{((similarity("records"."text", 'search') >= 0.3) OR (similarity("records"."text2", 'search') >= 0.3))}
     end
 
     it 'generates search condition with two columns, two terms and no options' do
       search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:trigram])
-      search_engine = search_engine_class.new('search word', [search_statement1])
+      search_engine = search_engine_class.new({ pattern: 'search word' }, [search_statement1])
       search_engine.conditions.to_sql.should == %{((similarity("records"."text", 'search word') >= 0.3) OR (similarity("records"."text2", 'search word') >= 0.3))}
     end
 
     it 'generates search condition with two columns, two terms and option "ignore_accent" set to true ' do
       search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:trigram], ignore_accent: true)
-      search_engine = search_engine_class.new('search word', [search_statement1])
+      search_engine = search_engine_class.new({ pattern: 'search word' }, [search_statement1])
       search_engine.conditions.to_sql.should == %{((similarity(unaccent("records"."text"), unaccent('search word')) >= 0.3) OR (similarity(unaccent("records"."text2"), unaccent('search word')) >= 0.3))}
+    end
+
+    it 'generates search condition with one column, one term, two statements and no options' do
+      search_statement1 = search_statement_class.new(['"records"."text"'], engines: [:trigram])
+      search_statement2 = search_statement_class.new(['"records"."text2"'], engines: [:trigram])
+      search_engine = search_engine_class.new({ pattern: 'search' }, [search_statement1, search_statement2])
+      search_engine.conditions.to_sql.should == %{((similarity("records"."text", 'search') >= 0.3) OR (similarity("records"."text2", 'search') >= 0.3))}
+    end
+
+    it 'generates search condition with one column, one term, two statements and "param_name" option set to "s"' do
+      search_statement1 = search_statement_class.new(['"records"."text"'], engines: [:trigram])
+      search_statement2 = search_statement_class.new(['"records"."text2"'], engines: [:trigram], param_name: 's')
+      search_engine = search_engine_class.new({ pattern: 'search', s: 'word' }, [search_statement1, search_statement2])
+      search_engine.conditions.to_sql.should == %{((similarity("records"."text", 'search') >= 0.3) OR (similarity("records"."text2", 'word') >= 0.3))}
     end
 
   end

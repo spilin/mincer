@@ -4,8 +4,6 @@ describe ::Mincer::Processors::PgJsonDumper::Processor do
   context 'when postgres is used' do
     before do
       setup_postgres_table
-      class ActiveRecordModel < ActiveRecord::Base
-      end
       ActiveRecordModel.create!(text: 'Test1')
       ActiveRecordModel.create!(text: 'Test2')
     end
@@ -48,8 +46,6 @@ describe ::Mincer::Processors::PgJsonDumper::Processor do
   context 'when postgres is NOT used' do
     before do
       setup_basic_sqlite3_table
-      class ActiveRecordModel < ActiveRecord::Base
-      end
       ActiveRecordModel.create!(id: 1, text: 'Test1')
       ActiveRecordModel.create!(id: 2, text: 'Test2')
     end

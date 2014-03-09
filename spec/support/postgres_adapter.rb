@@ -1,3 +1,5 @@
+class ActiveRecordModel < ActiveRecord::Base
+end
 def setup_postgres_table(columns = [['id', 'SERIAL PRIMARY KEY'], ['text', 'TEXT']])
   config = if ENV['TRAVIS']
              { adapter: :postgresql, database: 'mincer', username: 'postgres' }
@@ -10,6 +12,7 @@ def setup_postgres_table(columns = [['id', 'SERIAL PRIMARY KEY'], ['text', 'TEXT
 
   columns_sql = columns.map {|column| column.join(' ') }.join(',')
   ActiveRecord::Base.connection.execute("CREATE TABLE IF NOT EXISTS active_record_models (#{columns_sql})")
+  ActiveRecordModel.reset_column_information
 end
 
 

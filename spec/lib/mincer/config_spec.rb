@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+
 describe ::Mincer::Configuration do
 
   describe 'configuration of pg_search' do

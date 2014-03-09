@@ -33,6 +33,19 @@ RSpec.configure do |config|
     ActiveRecord::Base.clear_active_connections!
   end
 
+  config.before do
+    # Restoring defaults
+    Mincer.configure do |config|
+      config.pg_search do |search|
+        search.param_name = 'pattern'
+        search.fulltext_engine = { ignore_accent: true, any_word: false, dictionary: :simple, ignore_case: false }
+        search.trigram_engine = { ignore_accent: true, threshold: 0.3 }
+        search.array_engine = { ignore_accent: true, any_word: true }
+        search.engines = [Mincer::PgSearch::SearchEngines::Fulltext, Mincer::PgSearch::SearchEngines::Array, Mincer::PgSearch::SearchEngines::Trigram]
+      end
+    end
+  end
+
   # Run specs in random order to surface order dependencies. If you find an
   # order dependency and want to debug it, you can fix the order by providing
   # the seed, which is printed after each run.

@@ -201,16 +201,22 @@ If by any chance you need to disable `unaccent`:
     { :ignore_accent => false }
   end
 
-If you will set `any_word` attribute to true - search will return all items containing any word in the search terms.
+If you set `any_word` attribute to true - search will return all items containing any word in the search terms.
 
   def pg_search_options
     { :any_word => true }
   end
 
-If you will set `ignore_case` attribute to true - search will ignore case.
+If you set `ignore_case` attribute to true - search will ignore case.
 
   def pg_search_options
     { :ignore_case => true }
+  end
+
+If you set `param_name` attribute to any other string - this string will be used to extract search term from params.
+
+  def pg_search_options
+    { :param_name => 's' }
   end
 
 <a name="json"/>

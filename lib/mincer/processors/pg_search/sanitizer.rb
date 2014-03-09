@@ -48,7 +48,11 @@ module Mincer
         end
 
         def self.coalesce(term, val = '')
-          Arel::Nodes::NamedFunction.new('coalesce', [term, val])
+          if Mincer.pg_extension_installed?(:unaccent)
+            Arel::Nodes::NamedFunction.new('coalesce', [term, val])
+          else
+            term
+          end
         end
 
       end

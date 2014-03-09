@@ -1,6 +1,7 @@
 # Mincer
 [![Build Status](https://travis-ci.org/spilin/mincer.png)](https://travis-ci.org/spilin/mincer)
 [![Code Climate](https://codeclimate.com/github/spilin/mincer.png)](https://codeclimate.com/github/spilin/mincer)
+[![Coverage Status](https://coveralls.io/repos/spilin/mincer/badge.png)](https://coveralls.io/r/spilin/mincer)
 [![Gem Version](https://badge.fury.io/rb/mincer.png)](http://badge.fury.io/rb/mincer)
 
 Mincer is an ActiveRecord::Relation wrapper that applies usefull features to your queries. It can:

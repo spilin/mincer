@@ -14,6 +14,10 @@ SimpleCov.start do
   add_group 'Processors', '/lib/mincer/processors'
   add_group 'ActionView', '/lib/mincer/action_view'
 end
+
+require 'coveralls'
+Coveralls.wear!
+
 require 'rubygems'
 require 'bundler/setup'
 require 'active_record'

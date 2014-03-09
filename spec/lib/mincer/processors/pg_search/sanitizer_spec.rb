@@ -15,8 +15,19 @@ describe ::Mincer::Processors::PgSearch::Sanitizer do
       subject.sanitize_string('text', :ignore_accent).to_sql.should == "unaccent('text')"
     end
 
-    it 'applies "coalesce" option' do
-      subject.sanitize_string('text', :coalesce).to_sql.should == "coalesce('text', '')"
+    describe 'coalesce option' do
+      context 'when postgres extension installed' do
+        it 'applies "coalesce" option' do
+          subject.sanitize_string('text', :coalesce).to_sql.should == "coalesce('text', '')"
+        end
+      end
+      context 'when postgres extension is unavailable' do
+        it 'applies "coalesce" option' do
+          Mincer.instance_variable_get('@installed_extensions')[:unaccent] = false
+          subject.sanitize_string('text', :coalesce).to_sql.should == 'text'
+          Mincer.instance_variable_get('@installed_extensions')[:unaccent] = true
+        end
+      end
     end
 
     it 'applies multiple sanitizers' do

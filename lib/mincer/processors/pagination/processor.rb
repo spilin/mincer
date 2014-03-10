@@ -7,22 +7,30 @@ module Mincer
         end
 
         def apply
-          if kaminari?
-            @relation.page(@args['page']).per(@args['per_page'])
-          elsif will_paginate?
-            @relation.paginate(page: @args['page'], per_page: @args['per_page'])
+          if self.class.kaminari?
+            @relation.page(page).per(per_page)
+          elsif self.class.will_paginate?
+            @relation.paginate(page: page, per_page: per_page)
           else
             warn 'To enable pagination please add kaminari or will_paginate to your Gemfile'
             @relation
           end
         end
 
-        def kaminari?
+        def self.kaminari?
           defined?(::Kaminari)
         end
 
-        def will_paginate?
+        def self.will_paginate?
           defined?(::WillPaginate)
+        end
+
+        def page
+          @args[::Mincer.config.pagination.page_param_name]
+        end
+
+        def per_page
+          @args[::Mincer.config.pagination.per_page_param_name]
         end
       end
 
@@ -33,6 +41,18 @@ module Mincer
           def skip_pagination!
             active_processors.delete(Mincer::Processors::Pagination::Processor)
           end
+        end
+      end
+
+      class Configuration
+        include ActiveSupport::Configurable
+
+        config_accessor :page_param_name do
+          (::Mincer::Processors::Pagination::Processor.kaminari? && ::Kaminari.config.param_name) || :page
+        end
+
+        config_accessor :per_page_param_name do
+          :per_page
         end
       end
     end

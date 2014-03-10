@@ -74,13 +74,50 @@ describe ::Mincer::Processors::Pagination::Processor do
   context 'when there is no gem for pagination in loaded' do
     it 'returns all items' do
       subject = Class.new(Mincer::Base)
-      ::Mincer::Processors::Pagination::Processor.any_instance.stub(:kaminari?).and_return(false)
-      ::Mincer::Processors::Pagination::Processor.any_instance.stub(:will_paginate?).and_return(false)
+      ::Mincer::Processors::Pagination::Processor.stub(:kaminari?).and_return(false)
+      ::Mincer::Processors::Pagination::Processor.stub(:will_paginate?).and_return(false)
 
       query = subject.new(ActiveRecordModel)
       query.to_a.count.should eq(30)
     end
 
+  end
+
+
+  describe 'configuration of pg_search' do
+    before do
+      Mincer.config.instance_variable_set('@pagination', nil)
+    end
+
+    describe 'param_name' do
+      it 'uses "page" as default value for page_param_name' do
+        Mincer.config.pagination.page_param_name.should == :page
+      end
+
+      it 'sets param_name string' do
+        Mincer.configure do |config|
+          config.pagination do |search|
+            search.page_param_name = 's'
+          end
+        end
+        Mincer.config.pagination.page_param_name.should == 's'
+      end
+    end
+
+    describe 'param_name' do
+      it 'uses :per_page as default value for per_page_param_name' do
+        Mincer.config.pagination.per_page_param_name.should == :per_page
+      end
+
+      it 'sets param_name string' do
+        Mincer.configure do |config|
+          config.pagination do |search|
+            search.per_page_param_name = 's'
+          end
+        end
+        Mincer.config.pagination.per_page_param_name.should == 's'
+      end
+    end
   end
 
 end

@@ -15,8 +15,10 @@ SimpleCov.start do
   add_group 'ActionView', '/lib/mincer/action_view'
 end
 
-require 'coveralls'
-Coveralls.wear!
+if ENV['TRAVIS']
+  require 'coveralls'
+  Coveralls.wear!
+end
 
 require 'rubygems'
 require 'bundler/setup'
@@ -46,6 +48,10 @@ RSpec.configure do |config|
         search.trigram_engine = { ignore_accent: true, threshold: 0.3 }
         search.array_engine = { ignore_accent: true, any_word: true }
         search.engines = [Mincer::PgSearch::SearchEngines::Fulltext, Mincer::PgSearch::SearchEngines::Array, Mincer::PgSearch::SearchEngines::Trigram]
+      end
+      config.pagination do |paginaition|
+        paginaition.page_param_name = :page
+        paginaition.per_page_param_name = :per_page
       end
     end
   end

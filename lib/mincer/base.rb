@@ -7,7 +7,7 @@ module Mincer
 
     # Builds query object
     def initialize(scope, args = {})
-      @scope, @args, @relation = scope, args, build_query(scope, args)
+      @scope, @args, @relation = scope, ::ActiveSupport::HashWithIndifferentAccess.new(args), build_query(scope, args)
       execute_processors
     end
 

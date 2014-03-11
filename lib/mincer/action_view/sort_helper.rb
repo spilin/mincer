@@ -12,11 +12,11 @@ module Mincer
       def opposite_order_for(collection, attribute)
         return nil unless collection.sort_attribute == attribute.to_s
         if collection.sort_order.to_s.downcase == 'asc'
-          'DESC'
+          'desc'
         elsif collection.sort_order.to_s.downcase == 'desc'
-          'ASC'
+          'asc'
         else
-          'ASC'
+          'asc'
         end
       end
 
@@ -27,9 +27,9 @@ module Mincer
       # <tt>attribute</tt> - Attribute that will be used to sort table
       def sort_class_for(collection, attribute)
         return nil unless collection.sort_attribute == attribute.to_s
-        if collection.sort_order.upcase == 'ASC'
+        if collection.sort_order.downcase == 'asc'
           'sorted order_down'
-        elsif collection.sort_order.upcase == 'DESC'
+        elsif collection.sort_order.downcase == 'asc'
           'sorted order_up'
         else
           ''

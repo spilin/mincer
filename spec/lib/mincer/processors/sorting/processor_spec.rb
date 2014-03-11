@@ -82,4 +82,70 @@ describe ::Mincer::Processors::Sorting::Processor do
   end
 
 
+  describe 'configuration of sorting' do
+    before do
+      Mincer.config.instance_variable_set('@sorting', nil)
+    end
+
+    describe 'sort_param_name' do
+      it 'uses "sort" as default value for sort_param_name' do
+        Mincer.config.sorting.sort_param_name.should == :sort
+      end
+
+      it 'sets sort_param_name string' do
+        Mincer.configure do |config|
+          config.sorting do |search|
+            search.sort_param_name = 's'
+          end
+        end
+        Mincer.config.sorting.sort_param_name.should == 's'
+      end
+    end
+
+    describe 'sort_attribute' do
+      it 'uses :per_page as default value for sort_attribute' do
+        Mincer.config.sorting.sort_attribute.should == :id
+      end
+
+      it 'sets sort_attribute string' do
+        Mincer.configure do |config|
+          config.sorting do |search|
+            search.sort_attribute = 's'
+          end
+        end
+        Mincer.config.sorting.sort_attribute.should == 's'
+      end
+    end
+
+    describe 'order_param_name' do
+      it 'uses "order" as default value for order_param_name' do
+        Mincer.config.sorting.order_param_name.should == :order
+      end
+
+      it 'sets order_param_name string' do
+        Mincer.configure do |config|
+          config.sorting do |search|
+            search.order_param_name = 's'
+          end
+        end
+        Mincer.config.sorting.order_param_name.should == 's'
+      end
+    end
+
+    describe 'order_attribute' do
+      it 'uses :asc as default value for order_attribute' do
+        Mincer.config.sorting.order_attribute.should == :asc
+      end
+
+      it 'sets order_attribute string' do
+        Mincer.configure do |config|
+          config.sorting do |search|
+            search.order_attribute = 's'
+          end
+        end
+        Mincer.config.sorting.order_attribute.should == 's'
+      end
+    end
+  end
+
 end

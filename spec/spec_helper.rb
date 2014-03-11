@@ -53,6 +53,12 @@ RSpec.configure do |config|
         paginaition.page_param_name = :page
         paginaition.per_page_param_name = :per_page
       end
+      config.sorting do |paginaition|
+        paginaition.sort_param_name = :sort
+        paginaition.sort_attribute = :id
+        paginaition.order_param_name = :order
+        paginaition.order_attribute = :asc
+      end
     end
   end
 

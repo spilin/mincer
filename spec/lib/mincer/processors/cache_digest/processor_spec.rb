@@ -24,9 +24,4 @@ describe ::Mincer::Processors::CacheDigest::Processor do
     end
   end
 
-
-  context 'when postgres used' do
-
-  end
-
 end

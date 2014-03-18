@@ -38,7 +38,7 @@ module Mincer
         end
 
         def search_engine_statements_valid?
-          search_engine_statements.any? && search_engine_statements.all?(&:pattern_present?)
+          search_engine_statements.any? && search_engine_statements.any?(&:pattern_present?)
         end
 
         # This method executes before conditions are generated, override it if you need more

@@ -25,10 +25,6 @@ module Mincer
           options[:param_name] || Mincer.config.pg_search.param_name
         end
 
-        def extract_pattern_from(args)
-          @pattern ||= args[param_name]
-        end
-
       end
     end
   end

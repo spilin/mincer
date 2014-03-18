@@ -34,7 +34,7 @@ module Mincer
 
         def prepared_search_statements
           @prepared_search_statements ||= search_engine_statements.map do |search_statement|
-            search_statement.extract_pattern_from(args)
+            search_statement.pattern = args[search_statement.param_name]
             search_statement.pattern.present? ? search_statement : nil
           end.compact
         end

@@ -19,7 +19,7 @@ module Mincer
 
         def prepared_search_statements
           @prepared_search_statements ||= search_engine_statements.map do |search_statement|
-            pattern = search_statement.extract_pattern_from(args)
+            pattern = args[search_statement.param_name]
             search_statement.pattern = pattern && pattern.gsub(DISALLOWED_TSQUERY_CHARACTERS, ' ').split(' ').compact
             search_statement.pattern.present? && search_statement.pattern.any? ? search_statement : nil
           end.compact

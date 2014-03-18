@@ -7,7 +7,7 @@ module Mincer
           return nil unless prepared_search_statements.any?
           arel_group do
             prepared_search_statements.map do |search_statement|
-              if search_statement.extract_pattern_from(args)
+              if search_statement.pattern = args[search_statement.param_name]
                 terms_delimiter = search_statement.options[:any_word] ? '&&' : '@>'
                 arel_group(Arel::Nodes::InfixOperation.new(terms_delimiter, document_for(search_statement), query_for(search_statement)))
               end

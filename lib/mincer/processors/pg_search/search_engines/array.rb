@@ -4,10 +4,9 @@ module Mincer
       class Array < Base
 
         def conditions
-          prepare_search_statements
-          return nil unless search_engine_statements_valid?
+          return nil unless prepared_search_statements.any?
           arel_group do
-            search_engine_statements.map do |search_statement|
+            prepared_search_statements.map do |search_statement|
               if search_statement.extract_pattern_from(args)
                 terms_delimiter = search_statement.options[:any_word] ? '&&' : '@>'
                 arel_group(Arel::Nodes::InfixOperation.new(terms_delimiter, document_for(search_statement), query_for(search_statement)))

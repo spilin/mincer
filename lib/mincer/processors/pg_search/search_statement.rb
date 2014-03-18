@@ -26,11 +26,7 @@ module Mincer
         end
 
         def extract_pattern_from(args)
-          @pattern = args[param_name]
-        end
-
-        def pattern_present?
-          @pattern.try(:present?) || @pattern.try(:any?)
+          @pattern ||= args[param_name]
         end
 
       end

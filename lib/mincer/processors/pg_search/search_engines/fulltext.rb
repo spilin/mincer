@@ -5,11 +5,10 @@ module Mincer
         DISALLOWED_TSQUERY_CHARACTERS = /[!(:&|)'?\\]/
 
         def conditions
-          prepare_search_statements
-          return nil unless search_engine_statements_valid?
+          return nil unless prepared_search_statements.any?
           arel_group do
-            search_engine_statements.map do |search_statement|
-              arel_group(Arel::Nodes::InfixOperation.new('@@', document_for(search_statement) , query_for(search_statement)))
+            prepared_search_statements.map do |search_statement|
+              arel_group(Arel::Nodes::InfixOperation.new('@@', document_for(search_statement), query_for(search_statement)))
             end.compact.inject do |accumulator, expression|
               Arel::Nodes::Or.new(accumulator, expression)
             end
@@ -18,11 +17,12 @@ module Mincer
 
         private
 
-        def prepare_search_statements
-          search_engine_statements.each do |search_statement|
+        def prepared_search_statements
+          @prepared_search_statements ||= search_engine_statements.map do |search_statement|
             pattern = search_statement.extract_pattern_from(args)
             search_statement.pattern = pattern && pattern.gsub(DISALLOWED_TSQUERY_CHARACTERS, ' ').split(' ').compact
-          end
+            search_statement.pattern.present? && search_statement.pattern.any? ? search_statement : nil
+          end.compact
         end
 
         def document_for(search_statement)

@@ -4,10 +4,9 @@ module Mincer
       class Trigram < Base
 
         def conditions
-          prepare_search_statements
-          return nil unless search_engine_statements_valid?
+          return nil unless prepared_search_statements.any?
           arel_group do
-            search_engine_statements.map do |search_statement|
+            prepared_search_statements.map do |search_statement|
               document_for(search_statement)
             end.inject do |accumulator, expression|
               Arel::Nodes::Or.new(accumulator, expression)

@@ -32,21 +32,16 @@ module Mincer
           end
         end
 
+        def prepared_search_statements
+          @prepared_search_statements ||= search_engine_statements.map do |search_statement|
+            search_statement.extract_pattern_from(args)
+            search_statement.pattern.present? ? search_statement : nil
+          end.compact
+        end
+
         # Redefine this method in subclass if your engine name does not match class
         def engine_sym
           @engine_sym ||= self.class.name.to_s.demodulize.underscore.to_sym
-        end
-
-        def search_engine_statements_valid?
-          search_engine_statements.any? && search_engine_statements.any?(&:pattern_present?)
-        end
-
-        # This method executes before conditions are generated, override it if you need more
-        # the just extract pattern from args and saving it to instance variable.
-        def prepare_search_statements
-          search_engine_statements.each do |search_statement|
-            search_statement.extract_pattern_from(args)
-          end
         end
 
       end

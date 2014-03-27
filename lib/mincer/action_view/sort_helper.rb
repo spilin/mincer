@@ -28,9 +28,9 @@ module Mincer
       def sort_class_for(collection, attribute)
         return nil unless collection.sort_attribute == attribute.to_s
         if collection.sort_order.downcase == 'asc'
-          'sorted order_down'
-        elsif collection.sort_order.downcase == 'asc'
-          'sorted order_up'
+          ::Mincer.config.sorting.asc_class
+        elsif collection.sort_order.downcase == 'desc'
+          ::Mincer.config.sorting.desc_class
         else
           ''
         end

@@ -18,7 +18,7 @@ module Mincer
   end
 
   def self.add_processor(processor)
-    processor_scope = ::Mincer::Processors.const_get(processor.to_s.camelize)
+    processor_scope = ::Mincer::Processors.const_get(ActiveSupport::Inflector.camelize(processor.to_s, true))
     ::Mincer.processors << processor_scope.const_get('Processor')
     ::Mincer::Base.send(:include, processor_scope.const_get('Options')) if processor_scope.const_defined?('Options')
     ::Mincer.config.add(processor, processor_scope.const_get('Configuration'))  if processor_scope.const_defined?('Configuration') if processor_scope.const_defined?('Configuration')

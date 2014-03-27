@@ -37,10 +37,7 @@ describe ::Mincer::Processors::Pagination::Processor do
 
   context 'when WillPaginate is used for pagination' do
     before do
-      pending 'Need to fix test, need to unload Kaminari to test this'
-      #::Mincer::Processors::Paginator.any_instance.stub(:kaminari?).and_return(false)
-      #require 'will_paginate'
-      #require 'will_paginate/active_record'
+      ::Mincer::Processors::Pagination::Processor.stub(:kaminari?).and_return(false)
     end
 
     describe 'paginating with basic model without any Mincer::Base configuration' do
@@ -49,16 +46,10 @@ describe ::Mincer::Processors::Pagination::Processor do
       end
 
       it 'paginates by with provided page and per_page in args' do
-        query = subject.new(ActiveRecordModel, { 'page' => '2', 'per_page' => '20' })
-        query.to_a.count.should eq(10)
-      end
-
-      it 'paginates by default page(1) and per_page(10) when nothing passed to args' do
-        query = subject.new(ActiveRecordModel)
-        query.to_a.count.should eq(25)
+        ActiveRecord::Relation.any_instance.should_receive(:paginate).with(page: '2', per_page: '20')
+        subject.new(ActiveRecordModel, { 'page' => '2', 'per_page' => '20' })
       end
     end
-
 
     describe 'paginating when basic model has disabled pagination' do
       it 'returns all items' do

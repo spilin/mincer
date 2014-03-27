@@ -146,6 +146,36 @@ describe ::Mincer::Processors::Sorting::Processor do
         Mincer.config.sorting.order_attribute.should == 's'
       end
     end
+
+    describe 'asc_class' do
+      it 'uses "sorted order_down" as default value for asc_class' do
+        Mincer.config.sorting.asc_class.should == 'sorted order_down'
+      end
+
+      it 'sets asc_class string' do
+        Mincer.configure do |config|
+          config.sorting do |search|
+            search.asc_class = 's'
+          end
+        end
+        Mincer.config.sorting.asc_class.should == 's'
+      end
+    end
+
+    describe 'desc_class' do
+      it 'uses "sorted order_up" as default value for desc_class' do
+        Mincer.config.sorting.desc_class.should == 'sorted order_up'
+      end
+
+      it 'sets desc_class string' do
+        Mincer.configure do |config|
+          config.sorting do |search|
+            search.desc_class = 's'
+          end
+        end
+        Mincer.config.sorting.desc_class.should == 's'
+      end
+    end
   end
 
 end

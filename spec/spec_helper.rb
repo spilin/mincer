@@ -22,9 +22,16 @@ end
 
 require 'rubygems'
 require 'bundler/setup'
+require 'action_view'
 require 'active_record'
+require 'active_support'
+
+require 'will_paginate'
+#require 'will_paginate/active_record'
+
 require 'kaminari'
 Kaminari::Hooks.init
+
 require 'mincer'
 
 require 'support/postgres_adapter'

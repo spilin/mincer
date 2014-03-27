@@ -12,6 +12,8 @@ def setup_postgres_table(columns = [['id', 'SERIAL PRIMARY KEY'], ['text', 'TEXT
 
   columns_sql = columns.map {|column| column.join(' ') }.join(',')
   ActiveRecord::Base.connection.execute("CREATE TABLE IF NOT EXISTS active_record_models (#{columns_sql})")
+  ActiveRecord::Base.connection.execute('CREATE EXTENSION IF NOT EXISTS unaccent')
+  ActiveRecord::Base.connection.execute('CREATE EXTENSION IF NOT EXISTS pgcrypto')
   ActiveRecordModel.reset_column_information
 end
 

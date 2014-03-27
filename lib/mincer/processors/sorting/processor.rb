@@ -92,6 +92,14 @@ module Mincer
           :asc
         end
 
+        config_accessor :asc_class do
+          'sorted order_down'
+        end
+
+        config_accessor :desc_class do
+          'sorted order_up'
+        end
+
       end
 
     end

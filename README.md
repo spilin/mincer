@@ -182,12 +182,9 @@ Example of usage:
 
     employees = EmployeesListQuery.new(Employee, {'pattern' => 'whatever'})
 
-By default search will be performed on all text/string columns of current model. If you want to explicitly set searchable columns
-you can override `pg_search_options`:
+By default search will be performed on all text/string columns of current model. If you want to explicitly set searchable columns or you can do so using `pg_search` method:
 
-  def pg_search_options
-    { :columns => %w{employees.full_name companies.name} }
-  end
+    pg_search [{ :columns => %w{employees.full_name companies.name} } ]
 
 By default search will use [unaccent] to ignore accent marks. You can read more about `unaccent` [here](http://www.postgresql.org/docs/current/static/unaccent.html)
 You need to enable `unaccent` extension. If you use Rails, please use migration for that:
@@ -198,27 +195,41 @@ or run `CREATE EXTENSION IF NOT EXISTS unaccent;`
 
 If by any chance you need to disable `unaccent`:
 
-  def pg_search_options
-    { :ignore_accent => false }
-  end
+    pg_search [{ :columns => %w{employees.full_name companies.name} }, :ignore_accent => false ]
 
 If you set `any_word` attribute to true - search will return all items containing any word in the search terms.
 
-  def pg_search_options
-    { :any_word => true }
-  end
+    pg_search [{ :columns => %w{employees.full_name companies.name} }, :any_word => true ]
 
 If you set `ignore_case` attribute to true - search will ignore case.
 
-  def pg_search_options
-    { :ignore_case => true }
-  end
+    pg_search [{ :columns => %w{employees.full_name companies.name} }, :ignore_case => true ]
 
-If you set `param_name` attribute to any other string - this string will be used to extract search term from params.
+If you set `param_name` attribute to any other string - this string will be used to extract search term from params(Default param_name = 'patern').
 
-  def pg_search_options
-    { :param_name => 's' }
-  end
+    pg_search [{ :columns => %w{employees.full_name companies.name} }, :param_name => 's']
+    employees = EmployeesListQuery.new(Employee, {'s' => 'whatever'})
+
+There are 3 search engines you can use: `trigram`, `fulltext` and `array`.
+You can specify which one to use, along with other options like this:
+
+    pg_search [{ :columns => %w{employees.full_name companies.name}, :engines => [:fulltext, :trigram] ,:ignore_case => true, :threshold => 0.5, :dictionary => :english }]
+You can also add several search statements:
+
+    pg_search [
+        { :columns => %w{employees.full_name}, :engines => [:fulltext, :trigram] ,:ignore_case => true},
+        { :columns => %w{employees.tags}, :engines => [:array] ,:ignore_case => true, :any_word => true, param_name: 'tag'}
+    ]
+
+    employees = EmployeesListQuery.new(Employee, {'patern' => 'whatever', 'tag' => 'fired'})
+In this Mincer will search for all employees that are fired OR patern matches full_name. You can use additional option `join_with: :and`. To specify that you need only employees whith matching full name and tag
+
+    pg_search [
+        { :columns => %w{employees.full_name}, :engines => [:fulltext, :trigram] ,:ignore_case => true},
+        { :columns => %w{employees.tags}, :engines => [:array] ,:ignore_case => true, :any_word => true, param_name: 'tag'}
+    ], join_with: :and
+
+You can read details on search engines here: [Trigram](http://www.postgresql.org/docs/9.3/static/pgtrgm.html), [Fulltext](http://www.postgresql.org/docs/9.3/static/textsearch.html)
 
 <a name="json"/>
 ### JSON generation

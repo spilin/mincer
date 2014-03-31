@@ -74,4 +74,18 @@ describe ::Mincer::PgSearch::SearchEngines::Trigram do
 
   end
 
+  describe '.rank' do
+    it 'generates rank with one column, one term and no options' do
+      search_statement1 = search_statement_class.new(['"records"."text"'], engines: [:trigram])
+      search_engine = search_engine_class.new({ pattern: 'search' }, [search_statement1])
+      search_engine.rank.to_sql.should == %{(similarity("records"."text", 'search'))}
+    end
+
+    it 'generates rank with two columns, one term and no options' do
+      search_statement1 = search_statement_class.new(['"records"."text"', '"records"."text2"'], engines: [:trigram])
+      search_engine = search_engine_class.new({ pattern: 'search' }, [search_statement1])
+      search_engine.rank.to_sql.should == %{(similarity("records"."text", 'search') + similarity("records"."text2", 'search'))}
+    end
+  end
+
 end

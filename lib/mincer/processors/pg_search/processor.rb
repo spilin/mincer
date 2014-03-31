@@ -3,6 +3,7 @@ module Mincer
   module Processors
     module PgSearch
       class Processor
+        include ::Mincer::Processors::Helpers
 
         def initialize(mincer)
           @mincer, @args, @relation = mincer, mincer.args, mincer.relation
@@ -17,31 +18,44 @@ module Mincer
         end
 
         def apply_pg_search(relation, args)
-          relation.where(conditions(args))
+          relation.where(conditions(args)).reorder(rank(args))
         end
 
         def conditions(args)
-          pg_search_engines(args).map do |pg_search_engine|
-            pg_search_engine.conditions
-          end.compact.inject do |accumulator, expression|
-            Arel::Nodes::Or.new(accumulator, expression)
-          end.try(:to_sql)
+          search_statements_conditions = search_statements.map do |search_statement|
+            conditions = pg_search_engines(args, search_statement).map do |pg_search_engine|
+              pg_search_engine.conditions
+            end.compact
+            join_expressions(conditions, options[:join_with] || :or)
+          end.compact
+          join_expressions(search_statements_conditions, options[:join_with] || :or).try(:to_sql)
         end
 
-        def pg_search_engines(args)
+        def rank(args)
+          search_statements_conditions = search_statements.map do |search_statement|
+            conditions = pg_search_engines(args, search_statement).map do |pg_search_engine|
+              pg_search_engine.rank
+            end.compact
+            join_expressions(conditions, :+)
+          end.compact
+          rank = join_expressions(search_statements_conditions, :+).try(:to_sql)
+          "#{rank} DESC" if rank.present?
+        end
+
+        def pg_search_engines(args, search_statement)
           Mincer.config.pg_search.engines.map do |engine_class|
-            engine_class.new(args, search_statements)
+            engine_class.new(args, [search_statement])
           end
         end
 
         def search_statements
-          @search_statements ||= options.any? { |option| option[:columns] } ? search_statements_from_options : default_search_statements
+          @search_statements ||= params.any? { |param| param[:columns] } ? search_statements_from_params : default_search_statements
         end
 
-        def search_statements_from_options
-          options.map do |option|
-            opt = option.dup
-            SearchStatement.new(opt.delete(:columns), search_statement_default_options(option[:engines]).merge(opt))
+        def search_statements_from_params
+          params.map do |param|
+            par = param.dup
+            SearchStatement.new(par.delete(:columns), search_statement_default_options(param[:engines]).merge(par))
           end
         end
 
@@ -55,8 +69,12 @@ module Mincer
           [SearchStatement.new(column_names, search_statement_default_options([:fulltext]).merge(engines: [:fulltext]))]
         end
 
+        def params
+          Array.wrap(@mincer.send(:pg_search_params))
+        end
+
         def options
-          Array.wrap(@mincer.send(:pg_search_options))
+          @mincer.send(:pg_search_options)
         end
 
         def search_statement_default_options(engines)
@@ -65,10 +83,14 @@ module Mincer
             options
           end
         end
+
       end
 
       module Options
         extend ActiveSupport::Concern
+
+        def sort_by_rank
+        end
 
         module ClassMethods
           def skip_pg_search!
@@ -79,13 +101,20 @@ module Mincer
             skip_pg_search!
           end
 
-          def pg_search(params)
-            class_eval <<-OPTIONS
-              def pg_search_options
-                @pg_search_options ||= #{params.inspect}
-              end
+          def pg_search(params, options = {})
+            class_eval <<-OPTIONS, __FILE__, __LINE__
+            def pg_search_params
+              @pg_search_params ||= #{params.inspect}
+                end
+            def pg_search_options
+              @pg_search_options ||= #{options.inspect}
+                end
             OPTIONS
           end
+        end
+
+        def pg_search_params
+          @pg_search_params ||= {}
         end
 
         def pg_search_options

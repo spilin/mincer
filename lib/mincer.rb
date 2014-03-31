@@ -34,6 +34,8 @@ module Mincer
 
 end
 
+# Loading helpers
+require 'mincer/processors/helpers'
 
 # Loading processors
 require 'mincer/processors/sorting/processor'

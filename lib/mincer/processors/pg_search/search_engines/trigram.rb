@@ -6,11 +6,14 @@ module Mincer
         def conditions
           return nil unless prepared_search_statements.any?
           arel_group do
-            prepared_search_statements.map do |search_statement|
-              document_for(search_statement)
-            end.inject do |accumulator, expression|
-              Arel::Nodes::Or.new(accumulator, expression)
-            end
+            join_expressions(prepared_search_statements.map { |search_statement| document_for(search_statement) }, :or)
+          end
+        end
+
+        def rank
+          return nil unless prepared_search_statements.any?
+          arel_group do
+            join_expressions(prepared_search_statements.map { |search_statement| rank_for(search_statement) }, :+)
           end
         end
 
@@ -18,12 +21,18 @@ module Mincer
 
 
         def document_for(search_statement)
-          search_statement.columns.map do |search_column|
+          documents = search_statement.columns.map do |search_column|
             similarity = Arel::Nodes::NamedFunction.new('similarity', [sanitize_column(search_column, search_statement.sanitizers), sanitize_string(search_statement.pattern, search_statement.sanitizers)])
             arel_group(similarity.gteq(search_statement.threshold))
-          end.inject do |accumulator, expression|
-            Arel::Nodes::Or.new(accumulator, expression)
           end
+          join_expressions(documents, :or)
+        end
+
+        def rank_for(search_statement)
+          ranks = search_statement.columns.map do |search_column|
+            Arel::Nodes::NamedFunction.new('similarity', [sanitize_column(search_column, search_statement.sanitizers), sanitize_string(search_statement.pattern, search_statement.sanitizers)])
+          end
+          join_expressions(ranks, :+)
         end
 
       end

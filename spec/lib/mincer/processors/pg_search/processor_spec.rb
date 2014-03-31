@@ -15,7 +15,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
           pg_search [{ columns: %w{"active_record_models"."tags" }, engines: [:array] }]
         end
         query = subject.new(ActiveRecordModel)
-        query.send(:pg_search_options).should == [{ columns: %w{"active_record_models"."tags" }, engines: [:array] }]
+        query.send(:pg_search_params).should == [{ columns: %w{"active_record_models"."tags" }, engines: [:array] }]
       end
     end
 
@@ -72,6 +72,21 @@ describe ::Mincer::Processors::PgSearch::Processor do
               query.to_a.count.should eq(1)
               query.to_a.first.text.should == 'Test'
             end
+
+            it 'searches using 2 statements with aggregator set to :and' do
+              subject = Class.new(Mincer::Base) do
+                pg_search [
+                    { :columns => %w{"active_record_models"."tags" }, engines: [:array] },
+                    { :columns => %w{"active_record_models"."text" }, engines: [:fulltext] }
+                ], join_with: :and
+              end
+
+              ActiveRecordModel.create!(text: 'O', tags: ['O'])
+
+              query = subject.new(ActiveRecordModel, { 'pattern' => 'O' })
+              query.to_a.count.should eq(1)
+              query.to_a.first.text.should == 'O'
+            end
           end
 
 
@@ -108,7 +123,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
 
             it 'includes both when matched with array overlap and option "any_word" set to true(separated with ",")' do
               subject = Class.new(Mincer::Base) do
-                def pg_search_options
+                def pg_search_params
                   [{ :columns => %w{"active_record_models"."tags"}, engines: [:array], any_word: true }]
                 end
               end
@@ -118,7 +133,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
 
             it 'includes no items when nothing matched pattern' do
               subject = Class.new(Mincer::Base) do
-                def pg_search_options
+                def pg_search_params
                   [{ :columns => %w{"active_record_models"."tags" }, engines: [:array] }]
                 end
               end

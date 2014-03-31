@@ -72,6 +72,22 @@ describe ::Mincer::Processors::PgSearch::Processor do
               query.to_a.count.should eq(1)
               query.to_a.first.text.should == 'Test'
             end
+
+            it 'searches using 2 statements with aggregator set to :and' do
+              subject = Class.new(Mincer::Base) do
+                pg_search [
+                    { :columns => %w{"active_record_models"."tags" }, engines: [:array] },
+                    { :columns => %w{"active_record_models"."text" }, engines: [:fulltext] }
+                ]
+                pg_search_search_statement_aggregate_with :and
+              end
+
+              ActiveRecordModel.create!(text: 'O', tags: ['O'])
+
+              query = subject.new(ActiveRecordModel, { 'pattern' => 'O' })
+              query.to_a.count.should eq(1)
+              query.to_a.first.text.should == 'O'
+            end
           end
 
 

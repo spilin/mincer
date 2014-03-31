@@ -24,7 +24,7 @@ module Mincer
           pg_search_engines(args).map do |pg_search_engine|
             pg_search_engine.conditions
           end.compact.inject do |accumulator, expression|
-            Arel::Nodes::Or.new(accumulator, expression)
+            @mincer.send(:pg_search_search_statement_aggregator).new(accumulator, expression)
           end.try(:to_sql)
         end
 
@@ -86,10 +86,28 @@ module Mincer
               end
             OPTIONS
           end
+
+          # Temp solution for our project
+          def pg_search_search_statement_aggregate_with(aggregator_sym)
+            class_eval <<-OPTIONS
+              def pg_search_search_statement_aggregator
+                @pg_search_search_statement_aggregator ||= case :#{aggregator_sym.to_s}
+                                                             when :or then Arel::Nodes::Or
+                                                             when :and then Arel::Nodes::And
+                                                             else Arel::Nodes::Or
+                                                           end
+              end
+            OPTIONS
+          end
+
         end
 
         def pg_search_options
           @pg_search_options ||= {}
+        end
+
+        def pg_search_search_statement_aggregator
+          @pg_search_search_statement_aggregator ||= Arel::Nodes::Or
         end
       end
 

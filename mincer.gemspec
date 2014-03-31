@@ -26,4 +26,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'sqlite3'
   spec.add_development_dependency 'kaminari'
   spec.add_development_dependency 'will_paginate'
+  spec.add_development_dependency 'generator_spec'
 end

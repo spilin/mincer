@@ -38,7 +38,17 @@ Lets assume we have 2 models
         has_many :employees
     end
 
-Lets create class EmployeesListQuery class that will inherit from Mincer::Base, and instantiate it
+### Generating custom query
+
+    rails generate mincer:query EmployeesList
+
+Will generate employees_list_query.rb file in /app/queries/ directory
+
+    class EmployeesListQuery < Mincer::Base
+
+    end
+
+It inherits from Mincer::Base. Lets instantiate it
 
     class EmployeesListQuery < Mincer::Base
         # method should always return relation

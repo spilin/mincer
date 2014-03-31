@@ -21,16 +21,20 @@ module Mincer
         end
 
         def conditions(args)
-          pg_search_engines(args).map do |pg_search_engine|
-            pg_search_engine.conditions
+          search_statements.map do |search_statement|
+            pg_search_engines(args, search_statement).map do |pg_search_engine|
+              pg_search_engine.conditions
+            end.compact.inject do |accumulator, expression|
+              @mincer.send(:pg_search_search_statement_aggregator).new(accumulator, expression)
+            end
           end.compact.inject do |accumulator, expression|
             @mincer.send(:pg_search_search_statement_aggregator).new(accumulator, expression)
           end.try(:to_sql)
         end
 
-        def pg_search_engines(args)
+        def pg_search_engines(args, search_statement)
           Mincer.config.pg_search.engines.map do |engine_class|
-            engine_class.new(args, search_statements)
+            engine_class.new(args, [search_statement])
           end
         end
 

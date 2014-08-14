@@ -7,21 +7,32 @@ module Mincer
         end
 
         def apply
+          warn '!'*100
+          warn sort_string
+          warn sort_string.inspect
+          warn sort_string.class.name
+          warn '!'*100
           relation = @relation.order(sort_string)
           @mincer.sort_attribute, @mincer.sort_order = sort_attr, order_attr
           relation
         end
 
         def sort_string
-          sort_attr ? "#{sort_attr} #{order_attr}, #{default_sort}" : "#{default_sort} #{order_attr}"
+          if sort_attr
+            "#{sort_attr} #{order_attr || default_order}"
+          elsif sort_attr == ''
+            nil
+          else
+            "#{default_sort} #{order_attr || default_order}"
+          end
         end
 
         def sort_attr
-          (@mincer.send(:allowed_sort_attributes).include?(sort) && sort) || default_sort
+          @mincer.send(:allowed_sort_attributes).include?(sort) && sort
         end
 
         def order_attr
-          (%w{asc desc}.include?(order.try(:downcase)) && order) || default_order
+          %w{asc desc}.include?(order.try(:downcase)) && order
         end
 
         def sort

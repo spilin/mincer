@@ -44,6 +44,11 @@ module Mincer
           @engine_sym ||= self.class.name.to_s.demodulize.underscore.to_sym
         end
 
+        def rank
+          #Must be implemented in subclasses
+          nil
+        end
+
       end
     end
   end

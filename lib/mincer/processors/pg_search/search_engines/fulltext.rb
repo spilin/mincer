@@ -15,6 +15,17 @@ module Mincer
           end
         end
 
+        def rank
+          return nil unless prepared_search_statements.any?
+          arel_group do
+            prepared_search_statements.map do |search_statement|
+              Arel::Nodes::NamedFunction.new('ts_rank', [document_for(search_statement), query_for(search_statement)]).to_sql
+            end.compact.inject do |accumulator, expression|
+              Arel::Nodes::InfixOperation.new('+', ccumulator, expression)
+            end
+          end
+        end
+
         private
 
         def prepared_search_statements

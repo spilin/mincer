@@ -17,7 +17,7 @@ module Mincer
         end
 
         def apply_pg_search(relation, args)
-          relation.where(conditions(args))
+          relation.where(conditions(args)).order(rank(args))
         end
 
         def conditions(args)
@@ -28,6 +28,16 @@ module Mincer
             join_conditions(conditions, options[:join_with])
           end.compact
           join_conditions(search_statements_conditions, options[:join_with]).try(:to_sql)
+        end
+
+        def rank(args)
+          search_statements_conditions = search_statements.map do |search_statement|
+            conditions = pg_search_engines(args, search_statement).map do |pg_search_engine|
+              pg_search_engine.rank
+            end.compact
+            join_conditions(conditions, :+)
+          end.compact
+          join_conditions(search_statements_conditions, :+).try(:to_sql)
         end
 
         def pg_search_engines(args, search_statement)
@@ -75,6 +85,7 @@ module Mincer
         def join_conditions(expressions, join_with)
           case join_with
           when :and then Arel::Nodes::And.new(expressions)
+          when :+ then expressions.inject { |accumulator, expression| Arel::Nodes::InfixOperation.new('+', accumulator, expression) }
           else expressions.inject { |accumulator, expression| Arel::Nodes::Or.new(accumulator, expression) }
           end
         end

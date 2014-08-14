@@ -183,9 +183,9 @@ Example of usage:
     employees = EmployeesListQuery.new(Employee, {'pattern' => 'whatever'})
 
 By default search will be performed on all text/string columns of current model. If you want to explicitly set searchable columns
-you can override `pg_search_options`:
+you can override `pg_search_params`:
 
-  def pg_search_options
+  def pg_search_params
     { :columns => %w{employees.full_name companies.name} }
   end
 
@@ -198,25 +198,25 @@ or run `CREATE EXTENSION IF NOT EXISTS unaccent;`
 
 If by any chance you need to disable `unaccent`:
 
-  def pg_search_options
+  def pg_search_params
     { :ignore_accent => false }
   end
 
 If you set `any_word` attribute to true - search will return all items containing any word in the search terms.
 
-  def pg_search_options
+  def pg_search_params
     { :any_word => true }
   end
 
 If you set `ignore_case` attribute to true - search will ignore case.
 
-  def pg_search_options
+  def pg_search_params
     { :ignore_case => true }
   end
 
 If you set `param_name` attribute to any other string - this string will be used to extract search term from params.
 
-  def pg_search_options
+  def pg_search_params
     { :param_name => 's' }
   end
 

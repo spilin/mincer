@@ -15,7 +15,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
           pg_search [{ columns: %w{"active_record_models"."tags" }, engines: [:array] }]
         end
         query = subject.new(ActiveRecordModel)
-        query.send(:pg_search_options).should == [{ columns: %w{"active_record_models"."tags" }, engines: [:array] }]
+        query.send(:pg_search_params).should == [{ columns: %w{"active_record_models"."tags" }, engines: [:array] }]
       end
     end
 
@@ -78,8 +78,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
                 pg_search [
                     { :columns => %w{"active_record_models"."tags" }, engines: [:array] },
                     { :columns => %w{"active_record_models"."text" }, engines: [:fulltext] }
-                ]
-                pg_search_search_statement_aggregate_with :and
+                ], join_with: :and
               end
 
               ActiveRecordModel.create!(text: 'O', tags: ['O'])
@@ -124,7 +123,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
 
             it 'includes both when matched with array overlap and option "any_word" set to true(separated with ",")' do
               subject = Class.new(Mincer::Base) do
-                def pg_search_options
+                def pg_search_params
                   [{ :columns => %w{"active_record_models"."tags"}, engines: [:array], any_word: true }]
                 end
               end
@@ -134,7 +133,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
 
             it 'includes no items when nothing matched pattern' do
               subject = Class.new(Mincer::Base) do
-                def pg_search_options
+                def pg_search_params
                   [{ :columns => %w{"active_record_models"."tags" }, engines: [:array] }]
                 end
               end

@@ -21,15 +21,13 @@ module Mincer
         end
 
         def conditions(args)
-          search_statements.map do |search_statement|
-            pg_search_engines(args, search_statement).map do |pg_search_engine|
+          search_statements_conditions = search_statements.map do |search_statement|
+            conditions = pg_search_engines(args, search_statement).map do |pg_search_engine|
               pg_search_engine.conditions
-            end.compact.inject do |accumulator, expression|
-              @mincer.send(:pg_search_search_statement_aggregator).new(accumulator, expression)
-            end
-          end.compact.inject do |accumulator, expression|
-            @mincer.send(:pg_search_search_statement_aggregator).new(accumulator, expression)
-          end.try(:to_sql)
+            end.compact
+            join_conditions(conditions, options[:join_with])
+          end.compact
+          join_conditions(search_statements_conditions, options[:join_with]).try(:to_sql)
         end
 
         def pg_search_engines(args, search_statement)
@@ -39,13 +37,13 @@ module Mincer
         end
 
         def search_statements
-          @search_statements ||= options.any? { |option| option[:columns] } ? search_statements_from_options : default_search_statements
+          @search_statements ||= params.any? { |param| param[:columns] } ? search_statements_from_params : default_search_statements
         end
 
-        def search_statements_from_options
-          options.map do |option|
-            opt = option.dup
-            SearchStatement.new(opt.delete(:columns), search_statement_default_options(option[:engines]).merge(opt))
+        def search_statements_from_params
+          params.map do |param|
+            par = param.dup
+            SearchStatement.new(par.delete(:columns), search_statement_default_options(param[:engines]).merge(par))
           end
         end
 
@@ -59,14 +57,25 @@ module Mincer
           [SearchStatement.new(column_names, search_statement_default_options([:fulltext]).merge(engines: [:fulltext]))]
         end
 
+        def params
+          Array.wrap(@mincer.send(:pg_search_params))
+        end
+
         def options
-          Array.wrap(@mincer.send(:pg_search_options))
+          @mincer.send(:pg_search_options)
         end
 
         def search_statement_default_options(engines)
           (engines & [:fulltext, :trigram, :array]).inject({}) do |options, engine|
             options = Mincer.config.pg_search.send("#{engine}_engine").merge(options)
             options
+          end
+        end
+
+        def join_conditions(expressions, join_with)
+          case join_with
+          when :and then Arel::Nodes::And.new(expressions)
+          else expressions.inject { |accumulator, expression| Arel::Nodes::Or.new(accumulator, expression) }
           end
         end
       end
@@ -83,35 +92,24 @@ module Mincer
             skip_pg_search!
           end
 
-          def pg_search(params)
-            class_eval <<-OPTIONS
-              def pg_search_options
-                @pg_search_options ||= #{params.inspect}
-              end
+          def pg_search(params, options = {})
+            class_eval <<-OPTIONS, __FILE__, __LINE__
+            def pg_search_params
+              @pg_search_params ||= #{params.inspect}
+                end
+            def pg_search_options
+              @pg_search_options ||= #{options.inspect}
+                end
             OPTIONS
           end
+        end
 
-          # Temp solution for our project
-          def pg_search_search_statement_aggregate_with(aggregator_sym)
-            class_eval <<-OPTIONS
-              def pg_search_search_statement_aggregator
-                @pg_search_search_statement_aggregator ||= case :#{aggregator_sym.to_s}
-                                                             when :or then Arel::Nodes::Or
-                                                             when :and then Arel::Nodes::And
-                                                             else Arel::Nodes::Or
-                                                           end
-              end
-            OPTIONS
-          end
-
+        def pg_search_params
+          @pg_search_params ||= {}
         end
 
         def pg_search_options
           @pg_search_options ||= {}
-        end
-
-        def pg_search_search_statement_aggregator
-          @pg_search_search_statement_aggregator ||= Arel::Nodes::Or
         end
       end
 

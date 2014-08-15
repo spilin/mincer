@@ -7,11 +7,20 @@ module Mincer
         def conditions
           return nil unless prepared_search_statements.any?
           arel_group do
-            prepared_search_statements.map do |search_statement|
+            conditions = prepared_search_statements.map do |search_statement|
               arel_group(Arel::Nodes::InfixOperation.new('@@', document_for(search_statement), query_for(search_statement)))
-            end.compact.inject do |accumulator, expression|
-              Arel::Nodes::Or.new(accumulator, expression)
             end
+            join_expressions(conditions, :or)
+          end
+        end
+
+        def rank
+          return nil unless prepared_search_statements.any?
+          arel_group do
+            ranks = prepared_search_statements.map do |search_statement|
+              Arel::Nodes::NamedFunction.new('ts_rank', [document_for(search_statement), query_for(search_statement)]).to_sql
+            end
+            join_expressions(ranks, '+')
           end
         end
 

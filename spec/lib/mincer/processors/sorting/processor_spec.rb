@@ -12,7 +12,7 @@ describe ::Mincer::Processors::Sorting::Processor do
         pg_search [{ columns: %w{"active_record_models"."tags" }, engines: [:array] }]
       end
       query = subject.new(ActiveRecordModel)
-      query.send(:pg_search_options).should == [{ columns: %w{"active_record_models"."tags" }, engines: [:array] }]
+      query.send(:pg_search_params).should == [{ columns: %w{"active_record_models"."tags" }, engines: [:array] }]
     end
   end
 

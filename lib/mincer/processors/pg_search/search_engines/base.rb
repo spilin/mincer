@@ -2,6 +2,7 @@ module Mincer
   module PgSearch
     module SearchEngines
       class Base
+        include ::Mincer::Processors::Helpers
         attr_reader :args, :search_statements
 
         def initialize(args, search_statements)
@@ -42,6 +43,11 @@ module Mincer
         # Redefine this method in subclass if your engine name does not match class
         def engine_sym
           @engine_sym ||= self.class.name.to_s.demodulize.underscore.to_sym
+        end
+
+        def rank
+          #Must be implemented in subclasses
+          nil
         end
 
       end

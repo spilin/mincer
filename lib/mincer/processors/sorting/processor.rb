@@ -13,15 +13,19 @@ module Mincer
         end
 
         def sort_string
-          sort_attr ? "#{sort_attr} #{order_attr}, #{default_sort}" : "#{default_sort} #{order_attr}"
+          if sort_attr
+            "#{sort_attr} #{order_attr || default_order}"
+          else
+            "#{default_sort} #{order_attr || default_order}"
+          end
         end
 
         def sort_attr
-          (@mincer.send(:allowed_sort_attributes).include?(sort) && sort) || default_sort
+          @mincer.send(:allowed_sort_attributes).include?(sort) && sort
         end
 
         def order_attr
-          (%w{asc desc}.include?(order.try(:downcase)) && order) || default_order
+          %w{asc desc}.include?(order.try(:downcase)) && order
         end
 
         def sort
@@ -29,7 +33,7 @@ module Mincer
         end
 
         def default_sort
-          @mincer.try(:default_sort_attribute) || ::Mincer.config.sorting.sort_attribute
+          @mincer.try(:default_sort_attribute)
         end
 
         def order
@@ -37,7 +41,7 @@ module Mincer
         end
 
         def default_order
-          @mincer.try(:default_sort_order) || ::Mincer.config.sorting.order_attribute
+          @mincer.try(:default_sort_order)
         end
 
       end

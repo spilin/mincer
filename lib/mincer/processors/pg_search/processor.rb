@@ -19,7 +19,7 @@ module Mincer
 
         def apply_pg_search(relation, args)
           rel = relation.where(conditions(args))
-          rank = rank(args) ? rel.reorder(rank) : rel
+          (rank = rank(args)) ? rel.reorder(rank) : rel
         end
 
         def conditions(args)

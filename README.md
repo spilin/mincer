@@ -205,6 +205,12 @@ If you set `ignore_case` attribute to true - search will ignore case.
 
     pg_search [{ :columns => %w{employees.full_name companies.name} }, :ignore_case => true ]
 
+Options like `unaccent`, `any_word`, `ignore_case` can be set to be used only on query or document. In Example if you use specific column that already has unaccented and lowercased text with GIN/GIST index and do not want to additionally use `unaccent` or `ignore_case` functions on that column(because this will cause index not to work) -you can disable those options. Ex.
+
+    pg_search [{ :columns => %w{employees.full_name} }, :ignore_case => {query: true} ]
+
+This way `ignore_case` function will be used only on pattern that you are searching for and not on columns.
+
 If you set `param_name` attribute to any other string - this string will be used to extract search term from params(Default param_name = 'patern').
 
     pg_search [{ :columns => %w{employees.full_name companies.name} }, :param_name => 's']

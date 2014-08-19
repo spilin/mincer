@@ -9,8 +9,11 @@ module Mincer
           @columns, @options = columns, ::ActiveSupport::HashWithIndifferentAccess.new(options)
         end
 
-        def sanitizers
-          @sanitizers ||= Sanitizer::AVAILABLE_SANITIZERS.select { |sanitizer| options[sanitizer] }
+        def sanitizers(type = :all)
+          @sanitizers ||= {}
+          @sanitizers[type] ||= Sanitizer::AVAILABLE_SANITIZERS.select do |sanitizer|
+            options[sanitizer].is_a?(Hash) && [:query, :document].include?(type) ? options[sanitizer][type] : options[sanitizer]
+          end
         end
 
         def dictionary

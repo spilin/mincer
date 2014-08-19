@@ -299,6 +299,7 @@ or run `CREATE EXTENSION IF NOT EXISTS pgcrypto;`
     2. Change default arguments(sort, order, pattern, page, per_page..)
     3. Disable some processors for all Mincer objects
 2. Create rails generators.
+3. Add coalescing as option for document
 
 
 ## Contributing

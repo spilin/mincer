@@ -33,7 +33,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
 
           it 'order by rank' do
             query = subject.new(ActiveRecordModel, { 'pattern' => 'Bingo' })
-            query.to_sql.should include("(ts_rank((to_tsvector('simple', unaccent(coalesce(active_record_models.text, '')))), (to_tsquery('simple', unaccent('Bingo')))))")
+            query.to_sql.should include("(ts_rank((to_tsvector('simple', unaccent(active_record_models.text))), (to_tsquery('simple', unaccent('Bingo')))))")
             query.to_a.count.should eq(1)
           end
 

@@ -29,7 +29,7 @@ module Mincer
 
         def query_for(search_statement)
           normalized_pattern = search_statement.pattern.split(%r{\s|,}).uniq.reject(&:empty?).map do |item|
-            sanitize_string_quoted(item, search_statement.sanitizers).to_sql
+            sanitize_string_quoted(item, search_statement.sanitizers(:query)).to_sql
           end.join(',')
           Arel.sql("ARRAY[#{normalized_pattern}]")
         end

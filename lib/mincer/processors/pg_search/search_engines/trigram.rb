@@ -22,7 +22,7 @@ module Mincer
 
         def document_for(search_statement)
           documents = search_statement.columns.map do |search_column|
-            similarity = Arel::Nodes::NamedFunction.new('similarity', [sanitize_column(search_column, search_statement.sanitizers), sanitize_string(search_statement.pattern, search_statement.sanitizers)])
+            similarity = Arel::Nodes::NamedFunction.new('similarity', [sanitize_column(search_column, search_statement.sanitizers(:document)), sanitize_string(search_statement.pattern, search_statement.sanitizers(:query))])
             arel_group(similarity.gteq(search_statement.threshold))
           end
           join_expressions(documents, :or)
@@ -30,7 +30,7 @@ module Mincer
 
         def rank_for(search_statement)
           ranks = search_statement.columns.map do |search_column|
-            Arel::Nodes::NamedFunction.new('similarity', [sanitize_column(search_column, search_statement.sanitizers), sanitize_string(search_statement.pattern, search_statement.sanitizers)])
+            Arel::Nodes::NamedFunction.new('similarity', [sanitize_column(search_column, search_statement.sanitizers(:document)), sanitize_string(search_statement.pattern, search_statement.sanitizers(:query))])
           end
           join_expressions(ranks, :+)
         end

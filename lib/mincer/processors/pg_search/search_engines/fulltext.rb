@@ -36,8 +36,10 @@ module Mincer
 
         def document_for(search_statement)
           arel_group do
+            sanitizers = search_statement.sanitizers(:document)
+            sanitizers += [:coalesce] if (search_statement.columns.size > 1)
             search_statement.columns.map do |search_column|
-              sanitized_term = sanitize_column(search_column, search_statement.sanitizers + [:coalesce])
+              sanitized_term = sanitize_column(search_column, sanitizers)
               Arel::Nodes::NamedFunction.new('to_tsvector', [search_statement.dictionary, sanitized_term]).to_sql
             end.join(' || ')
           end
@@ -45,12 +47,11 @@ module Mincer
 
         def query_for(search_statement)
           terms_delimiter = search_statement.options[:any_word] ? '|' : '&'
-          tsquery_sql = Arel.sql(search_statement.terms.map { |term| sanitize_string_quoted(term, search_statement.sanitizers).to_sql }.join(" || ' #{terms_delimiter} ' || "))
+          tsquery_sql = Arel.sql(search_statement.terms.map { |term| sanitize_string_quoted(term, search_statement.sanitizers(:query)).to_sql }.join(" || ' #{terms_delimiter} ' || "))
           arel_group do
             Arel::Nodes::NamedFunction.new('to_tsquery', [search_statement.dictionary, tsquery_sql])
           end
         end
-
       end
 
     end

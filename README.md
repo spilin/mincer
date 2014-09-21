@@ -45,7 +45,10 @@ Lets assume we have 2 models
 Will generate employees_list_query.rb file in /app/queries/ directory
 
     class EmployeesListQuery < Mincer::Base
-
+      def build_query(relation, args)
+        # Apply your conditions, custom selects, etc. to relation
+        relation
+      end        
     end
 
 It inherits from Mincer::Base. Lets instantiate it

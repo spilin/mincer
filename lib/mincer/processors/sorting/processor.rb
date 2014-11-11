@@ -8,7 +8,7 @@ module Mincer
 
         def apply
           relation = @relation.order(sort_string)
-          @mincer.sort_attribute, @mincer.sort_order = sort_attr, order_attr
+          @mincer.sort_attribute, @mincer.sort_order = sort_attr.to_s, order_attr.to_s
           relation
         end
 
@@ -21,11 +21,11 @@ module Mincer
         end
 
         def sort_attr
-          @mincer.send(:allowed_sort_attributes).include?(sort) && sort
+          (@mincer.send(:allowed_sort_attributes).include?(sort) && sort) || default_sort
         end
 
         def order_attr
-          %w{asc desc}.include?(order.try(:downcase)) && order
+          (%w{asc desc}.include?(order.try(:downcase)) && order) || default_order
         end
 
         def sort

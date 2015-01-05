@@ -3,6 +3,7 @@ module Mincer
     module Helpers
 
       def join_expressions(expressions, join_with)
+        return expressions.first if expressions.size < 2
         case join_with
         when :and then Arel::Nodes::And.new(expressions)
         when :or then expressions.inject { |accumulator, expression| Arel::Nodes::Or.new(accumulator, expression) }

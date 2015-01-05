@@ -33,7 +33,7 @@ describe ::Mincer::PgSearch::SearchEngines::Fulltext do
       it 'generates search condition with one column, one term and no options without columns wrapped with coalesce' do
         search_statement1 = search_statement_class.new(['"records"."text"'], engines: [:fulltext])
         search_engine = search_engine_class.new({ pattern: 'search' }, [search_statement1])
-        search_engine.conditions.to_sql.should == %{((to_tsvector('simple', "records"."text") @@ to_tsquery('simple', 'search')))}
+        search_engine.conditions.to_sql.should == %{(to_tsvector('simple', "records"."text") @@ to_tsquery('simple', 'search'))}
       end
     end
 
@@ -86,7 +86,7 @@ describe ::Mincer::PgSearch::SearchEngines::Fulltext do
     it 'generates search condition with one column, one term and option "dictionary" set to :english' do
       search_statement1 = search_statement_class.new(['"records"."text"'], engines: [:fulltext], dictionary: :english)
       search_engine = search_engine_class.new({ pattern: 'search' }, [search_statement1])
-      search_engine.conditions.to_sql.should == %{((to_tsvector('english', "records"."text") @@ to_tsquery('english', 'search')))}
+      search_engine.conditions.to_sql.should == %{(to_tsvector('english', "records"."text") @@ to_tsquery('english', 'search'))}
     end
 
     it 'generates search condition with two search statements one column, one term and no options' do

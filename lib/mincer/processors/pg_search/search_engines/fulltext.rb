@@ -47,14 +47,14 @@ module Mincer
           # sanitizers += [:coalesce] if (search_statement.columns.size > 1)
           documents =  search_statement.columns.map do |search_column|
             sanitized_term = sanitize_column(search_column, sanitizers)
-            ts_vector = Arel::Nodes::NamedFunction.new('to_tsvector', [search_statement.dictionary, sanitized_term])
+            ts_vector = Arel::Nodes::NamedFunction.new('to_tsvector', [quote(search_statement.dictionary), sanitized_term])
           end
         end
 
         def ts_query_for(search_statement)
           terms_delimiter = search_statement.options[:any_word] ? '|' : '&'
           tsquery_sql = Arel.sql(search_statement.terms.map { |term| sanitize_string_quoted(term, search_statement.sanitizers(:query)).to_sql }.join(" || ' #{terms_delimiter} ' || "))
-          Arel::Nodes::NamedFunction.new('to_tsquery', [search_statement.dictionary, tsquery_sql])
+          Arel::Nodes::NamedFunction.new('to_tsquery', [quote(search_statement.dictionary), tsquery_sql])
         end
       end
 

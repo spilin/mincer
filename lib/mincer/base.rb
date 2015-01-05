@@ -27,10 +27,10 @@ module Mincer
     # Allows enumerable methods to be called directly on object
     def each(&block)
       @collection ||= if @relation.is_a?(ActiveRecord::Relation)
-                        @relation.to_a
-                      else
-                        @relation.all
-                      end
+        @relation.to_a
+      else
+        @relation.all
+      end
       @collection.each(&block)
     end
 

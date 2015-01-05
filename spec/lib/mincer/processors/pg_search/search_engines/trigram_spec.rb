@@ -31,13 +31,13 @@ describe ::Mincer::PgSearch::SearchEngines::Trigram do
     it 'generates search condition with one column, one term and no options' do
       search_statement1 = search_statement_class.new(['"records"."text"'], engines: [:trigram])
       search_engine = search_engine_class.new({ pattern: 'search' }, [search_statement1])
-      search_engine.conditions.to_sql.should == %{(("records"."text" % 'search'))}
+      search_engine.conditions.to_sql.should == %{("records"."text" % 'search')}
     end
 
     it 'generates search condition with one column, one term and "threshold" option set to 0.5' do
       search_statement1 = search_statement_class.new(['"records"."text"'], engines: [:trigram], threshold: 0.5)
       search_engine = search_engine_class.new({ pattern: 'search' }, [search_statement1])
-      search_engine.conditions.to_sql.should == %{((similarity("records"."text", 'search') >= 0.5))}
+      search_engine.conditions.to_sql.should == %{(similarity("records"."text", 'search') >= 0.5)}
     end
 
     it 'generates search condition with two columns, one term and no options' do

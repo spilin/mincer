@@ -15,7 +15,11 @@ module Mincer
 
         def sanitize_string(options = {})
           if sanitizers.empty?
-            return options[:quote] ? Mincer.connection.quote(@term) : @term
+            if defined?(Arel::Nodes::Quoted)
+              return self.class.quote(@term)
+            elsif options[:quote]
+              return Mincer.connection.quote(@term)
+            end
           end
           @sanitized_string ||= sanitize(@term)
         end
@@ -40,18 +44,26 @@ module Mincer
         end
 
         def self.ignore_case(term)
-          Arel::Nodes::NamedFunction.new('lower', [term])
+          Arel::Nodes::NamedFunction.new('lower', [quote(term)])
         end
 
         def self.ignore_accent(term)
-          Arel::Nodes::NamedFunction.new('unaccent', [term])
+          Arel::Nodes::NamedFunction.new('unaccent', [quote(term)])
         end
 
         def self.coalesce(term, val = '')
           if Mincer.pg_extension_installed?(:unaccent)
-            Arel::Nodes::NamedFunction.new('coalesce', [term, val])
+            Arel::Nodes::NamedFunction.new('coalesce', [quote(term), quote(val)])
           else
             term
+          end
+        end
+
+        def self.quote(string)
+          if defined?(Arel::Nodes::Quoted) && !string.is_a?(Arel::Nodes::Quoted) && !string.is_a?(Arel::Nodes::NamedFunction)
+            Arel::Nodes::Quoted.new(string)
+          else
+            string
           end
         end
 

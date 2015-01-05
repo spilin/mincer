@@ -12,6 +12,7 @@ module Mincer
         def arel_group(sql_string = nil)
           sql_string = yield if block_given?
           arel_query = sql_string.is_a?(String) ? Arel.sql(sql_string) : sql_string
+          return arel_query if arel_query.is_a?(Arel::Nodes::Grouping)
           Arel::Nodes::Grouping.new(arel_query)
         end
 
@@ -48,6 +49,10 @@ module Mincer
         def rank
           #Must be implemented in subclasses
           nil
+        end
+
+        def quote(string)
+          Mincer::Processors::PgSearch::Sanitizer.quote(string)
         end
 
       end

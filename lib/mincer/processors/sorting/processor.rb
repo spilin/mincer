@@ -12,7 +12,7 @@ module Mincer
             @mincer.sort_attribute, @mincer.sort_order = sort_attr.to_s, order_attr.to_s
             @relation.order(sorting_sting)
           else
-            relation
+            @relation
           end
         end
 

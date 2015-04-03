@@ -7,17 +7,17 @@ module Mincer
         end
 
         def apply
-          relation = @relation.order(sort_string)
-          @mincer.sort_attribute, @mincer.sort_order = sort_attr.to_s, order_attr.to_s
-          relation
+          sorting_sting = sort_string
+          if sorting_sting.present?
+            @mincer.sort_attribute, @mincer.sort_order = sort_attr.to_s, order_attr.to_s
+            @relation.order(sorting_sting)
+          else
+            relation
+          end
         end
 
         def sort_string
-          if sort_attr
-            "#{sort_attr} #{order_attr || default_order}"
-          else
-            "#{default_sort} #{order_attr || default_order}"
-          end
+          [(sort_attr || default_sort), (order_attr || default_order)].compact.uniq.join(' ')
         end
 
         def sort_attr

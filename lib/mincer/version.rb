@@ -1,7 +1,7 @@
 module Mincer
 
   def self.version
-    Gem::Version.new '0.2.6'
+    Gem::Version.new '0.2.7'
   end
 
   module VERSION #:nodoc:
@@ -9,10 +9,3 @@ module Mincer
     STRING = Mincer.version.to_s
   end
 end
-
-
-
-
-
-
-

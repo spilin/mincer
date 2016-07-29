@@ -7,8 +7,8 @@ module Mincer
 
     # Builds query object
     def initialize(scope, args = {})
-      @args = if defined?(ActionController::Parameters) && args.is_a?(ActionController::Parameters)
-        args.to_unsafe_h
+      @args = if defined?(ActionController::Parameters) && args.is_a?(ActionController::Parameters) && args.respond_to?(:to_unsafe_h)
+        ::ActiveSupport::HashWithIndifferentAccess.new(args.to_unsafe_h)
       else
         ::ActiveSupport::HashWithIndifferentAccess.new(args)
       end

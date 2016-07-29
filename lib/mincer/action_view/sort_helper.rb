@@ -5,8 +5,8 @@ module Mincer
       #
       # <tt>collection</tt> - instance of QueryObject
       # <tt>attribute</tt> - Attribute that will be used to sort table
-      def sort_url_for(collection, attribute)
-        url_for(params.merge(:sort => attribute, :order => opposite_order_for(collection, attribute)))
+      def sort_url_for(collection, attribute, permitted_params = params)
+        url_for(permitted_params.merge(:sort => attribute, :order => opposite_order_for(collection, attribute)))
       end
 
       def opposite_order_for(collection, attribute)

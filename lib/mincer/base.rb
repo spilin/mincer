@@ -7,7 +7,12 @@ module Mincer
 
     # Builds query object
     def initialize(scope, args = {})
-      @scope, @args, @relation = scope, ::ActiveSupport::HashWithIndifferentAccess.new(args), build_query(scope, args)
+      @args = if defined?(ActionController::Parameters) && args.is_a?(ActionController::Parameters)
+        args.to_unsafe_h
+      else
+        ::ActiveSupport::HashWithIndifferentAccess.new(args)
+      end
+      @scope, @relation = scope, build_query(scope, @args)
       execute_processors
     end
 

@@ -30,7 +30,7 @@ module Mincer
         end
 
         def per_page
-          @args[::Mincer.config.pagination.per_page_param_name]
+          @mincer.class.default_per_page || @args[::Mincer.config.pagination.per_page_param_name]
         end
       end
 
@@ -40,6 +40,14 @@ module Mincer
         module ClassMethods
           def skip_pagination!
             active_processors.delete(Mincer::Processors::Pagination::Processor)
+          end
+
+          def paginate_defaults(options = {})
+            @default_per_page = options[:per_page] if options[:per_page]
+          end
+
+          def default_per_page
+            @default_per_page
           end
         end
       end

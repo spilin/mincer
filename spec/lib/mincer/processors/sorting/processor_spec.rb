@@ -58,6 +58,30 @@ describe ::Mincer::Processors::Sorting::Processor do
     end
   end
 
+  context 'when sort and order is not given in params' do
+    it 'sets @mincer.default_sorting to true' do
+      subject = Class.new(Mincer::Base)
+      query = subject.new(ActiveRecordModel, { })
+      expect(query.default_sorting).to eq(true)
+    end
+  end
+
+  context 'when sort is given in params' do
+    it 'sets @mincer.default_sorting to false' do
+      subject = Class.new(Mincer::Base)
+      query = subject.new(ActiveRecordModel, { 'sort' => 'text' })
+      expect(query.default_sorting).to eq(false)
+    end
+  end
+
+  context 'when order is given in params' do
+    it 'sets @mincer.default_sorting to false' do
+      subject = Class.new(Mincer::Base)
+      query = subject.new(ActiveRecordModel, { 'order' => 'asc' })
+      expect(query.default_sorting).to eq(false)
+    end
+  end
+
   describe 'sorting with basic model with defaults changed' do
     it 'sorts by default attributes(id) abd order(ASC) when nothing passed to args' do
       subject = Class.new(Mincer::Base) do

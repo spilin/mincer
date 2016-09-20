@@ -19,7 +19,14 @@ module Mincer
 
         def apply_pg_search(relation, args)
           rel = relation.where(conditions(args))
-          (rank = rank(args)) ? rel.reorder(rank) : rel
+          rank = rank(args)
+          if rank.blank?
+            rel
+          elsif @mincer.default_sorting
+            rel.reorder(rank)
+          else
+            rel.order(rank)
+          end
         end
 
         def conditions(args)

@@ -9,7 +9,9 @@ module Mincer
         def apply
           sorting_sting = sort_string
           if sorting_sting.present?
-            @mincer.sort_attribute, @mincer.sort_order = sort_attr.to_s, order_attr.to_s
+            @mincer.sort_attribute = (sort_attr || default_sort).to_s
+            @mincer.sort_order = (order_attr || default_order).to_s
+            @mincer.default_sorting = sort_attr.blank? && order_attr.blank?
             @relation.order(sorting_sting)
           else
             @relation
@@ -21,11 +23,11 @@ module Mincer
         end
 
         def sort_attr
-          (@mincer.send(:allowed_sort_attributes).include?(sort) && sort) || default_sort
+          (@mincer.send(:allowed_sort_attributes).include?(sort) && sort)
         end
 
         def order_attr
-          (%w{asc desc}.include?(order.try(:downcase)) && order) || default_order
+          (%w{asc desc}.include?(order.try(:downcase)) && order)
         end
 
         def sort
@@ -52,7 +54,7 @@ module Mincer
 
         included do
           # Used in view helpers
-          attr_accessor :sort_attribute, :sort_order
+          attr_accessor :sort_attribute, :sort_order, :default_sorting
         end
 
         module ClassMethods

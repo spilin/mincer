@@ -19,9 +19,11 @@ module Mincer
         private
 
         def document_for(search_statement)
+          sanitizers = search_statement.sanitizers(:document)
           arel_group do
             documents = search_statement.columns.map do |search_column|
-              Arel.sql(search_column + '::text[]')
+              sanitized_term = sanitizers.any? ? sanitize_column("#{search_column}::text", sanitizers).to_sql : search_column
+              Arel.sql(sanitized_term + '::text[]')
             end
             join_expressions(documents, '||')
           end

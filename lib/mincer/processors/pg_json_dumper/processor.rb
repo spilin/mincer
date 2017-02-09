@@ -13,7 +13,8 @@ module Mincer
 
         def to_json
           if dump_supported?
-            Mincer.connection.execute(json_query).first['json']
+            result = Mincer.connection.execute(json_query).first['json']
+            @options[:singularize] ? (result[1..-2].presence || '{}') : result
           else
             warn 'To dump data to json with postgres you need to use postgres server version >= 9.2'
           end

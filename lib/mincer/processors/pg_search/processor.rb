@@ -20,7 +20,7 @@ module Mincer
         def apply_pg_search(relation, args)
           rel = relation.where(conditions(args))
           rank = rank(args)
-          if rank.blank?
+          if rank.blank? || (@mincer.respond_to?(:skip_order_by_rank) && @mincer.skip_order_by_rank)
             rel
           elsif @mincer.default_sorting
             rel.reorder(rank)

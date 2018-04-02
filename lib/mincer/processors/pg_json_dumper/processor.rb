@@ -30,7 +30,7 @@ module Mincer
 
         def json_query
           if @options[:root]
-            json_query_with_root(@options[:root])
+            json_query_with_root(@options[:root], @options[:meta])
           else
             basic_json_query
           end
@@ -41,17 +41,23 @@ module Mincer
         end
 
         # Query for basic json generation. Ex: [{'id': 1}, {...}]
-        def basic_json_query(root = 'json')
+        def basic_json_query(root = 'json', meta = false)
+          meta_sql = if meta
+            ", #{@mincer.total_pages} AS total_pages, #{@mincer.total_count} AS total_count, #{@mincer.current_page} AS current_page, #{@mincer.limit_value} AS per_page"
+          else
+            ''
+          end
           <<-SQL
-            SELECT COALESCE(array_to_json(array_agg(row_to_json(subq))), '[]') AS #{root}
+            SELECT COALESCE(array_to_json(array_agg(row_to_json(subq))), '[]') AS #{root} #{meta_sql}
             FROM (#{base_sql}) as subq
           SQL
         end
 
         # Generates json with root. Ex: If root = 'items' resulting json will be { 'items' => [...] }
-        def json_query_with_root(root)
+        # When `meta` passed will add pagination data(Experimental!!!)
+        def json_query_with_root(root, meta)
           <<-SQL
-            SELECT row_to_json(t) as json FROM ( #{basic_json_query(root)} ) as t
+            SELECT row_to_json(t) as json FROM ( #{basic_json_query(root, meta)} ) as t
           SQL
         end
 

@@ -47,7 +47,7 @@ module Mincer
             join_expressions(conditions, :+)
           end.compact
           rank = join_expressions(search_statements_conditions, :+).try(:to_sql)
-          "#{rank} DESC" if rank.present?
+          Arel.sql("#{rank} DESC") if rank.present?
         end
 
         def pg_search_engines(args, search_statement)

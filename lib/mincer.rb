@@ -10,7 +10,7 @@ module Mincer
   end
 
   def self.postgres?
-    self.connection.is_a?(::ActiveRecord::ConnectionAdapters::PostgreSQLAdapter) rescue false
+    self.connection.adapter_name == 'PostgreSQL' rescue false
   end
 
   def self.connection

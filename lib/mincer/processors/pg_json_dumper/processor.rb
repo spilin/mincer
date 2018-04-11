@@ -13,7 +13,7 @@ module Mincer
 
         def to_json
           if dump_supported?
-            result = Mincer.connection.execute(json_query).first['json']
+            result = Mincer.connection.select_all(json_query).first['json']
             return result unless @options[:singularize]
             return (result[1..-2].presence || '{}') unless @options[:root]
             (result.sub('[', '').sub(/(\])}$/, '}').presence || '{}')

@@ -15,7 +15,7 @@ describe ::Mincer::Processors::PgJsonDumper::Processor do
 
       it 'dumps data via postgres' do
         query = subject.new(ActiveRecordModel)
-        ActiveRecord::Base.connection.should_receive(:execute).and_call_original
+        ActiveRecord::Base.connection.should_receive(:select_all).and_call_original
         json_string = query.to_json
         json_string.should be_a(String)
         json_hash = JSON.parse(json_string)
@@ -29,7 +29,7 @@ describe ::Mincer::Processors::PgJsonDumper::Processor do
       context 'when root option is passed' do
         it 'puts responce inside under root key' do
           query = subject.new(ActiveRecordModel)
-          ActiveRecord::Base.connection.should_receive(:execute).and_call_original
+          ActiveRecord::Base.connection.should_receive(:select_all).and_call_original
           json_string = query.to_json(root: 'items')
           json_string.should be_a(String)
           json_hash = JSON.parse(json_string)
@@ -56,7 +56,7 @@ describe ::Mincer::Processors::PgJsonDumper::Processor do
 
     it 'dumps data via calling super' do
       query = subject.new(ActiveRecordModel)
-      ActiveRecord::Base.connection.should_not_receive(:execute)
+      ActiveRecord::Base.connection.should_not_receive(:select_all)
       json_string = query.to_json
       json_string.should be_nil
     end

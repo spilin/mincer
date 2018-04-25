@@ -7,7 +7,9 @@ module Mincer
         end
 
         def apply
-          if self.class.kaminari?
+          if defined?(::Chewy) && @mincer.respond_to?(:chewy_search)
+            @relation
+          elsif self.class.kaminari?
             @relation.page(page).per(per_page)
           elsif self.class.will_paginate?
             @relation.paginate(page: page, per_page: per_page)
@@ -48,6 +50,26 @@ module Mincer
 
           def default_per_page
             @default_per_page
+          end
+        end
+
+        def total_pages
+          delegate_pagination(:total_pages)
+        end
+
+        def current_page
+          delegate_pagination(:current_page)
+        end
+
+        def limit_value
+          delegate_pagination(:limit_value)
+        end
+
+        def delegate_pagination(method)
+          if self.respond_to?(:chewy_search_result) && self.chewy_search_result
+            self.chewy_search_result.send(method)
+          else
+            @relation.send(method)
           end
         end
       end

@@ -21,7 +21,7 @@ module Mincer
     processor_scope = ::Mincer::Processors.const_get(ActiveSupport::Inflector.camelize(processor.to_s, true))
     ::Mincer.processors << processor_scope.const_get('Processor')
     ::Mincer::Base.send(:include, processor_scope.const_get('Options')) if processor_scope.const_defined?('Options')
-    ::Mincer.config.add(processor, processor_scope.const_get('Configuration'))  if processor_scope.const_defined?('Configuration') if processor_scope.const_defined?('Configuration')
+    ::Mincer.config.add(processor, processor_scope.const_get('Configuration')) if processor_scope.const_defined?('Configuration')
   end
 
   def self.pg_extension_installed?(extension)
@@ -39,6 +39,7 @@ require 'mincer/processors/helpers'
 
 # Loading processors
 require 'mincer/processors/sorting/processor'
+require 'mincer/processors/chewy_search/processor'
 require 'mincer/processors/pagination/processor'
 require 'mincer/processors/pg_search/search_statement'
 require 'mincer/processors/pg_search/sanitizer'

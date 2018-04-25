@@ -18,7 +18,7 @@ module Mincer
             @mincer.chewy_search_result = chewy_search_query
             ids = @mincer.chewy_search_result.to_a.map {|e| e.attributes['id']}
             table_name = @relation.class.respond_to?(:table_name) ? @relation.class.table_name : @relation.model.table_name
-            @relation = @relation.where(id: ids).reorder("array_position(ARRAY#{ids}, #{table_name}.id)")
+            @relation = @relation.where(id: ids).reorder("array_position(ARRAY#{ids}::integer[], #{table_name}.id)")
           end
           @relation
         end

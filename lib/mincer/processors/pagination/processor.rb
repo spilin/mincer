@@ -9,6 +9,8 @@ module Mincer
         def apply
           if defined?(::Chewy) && @mincer.respond_to?(:chewy_search)
             @relation
+          elsif @mincer.respond_to?(:elastic_search)
+            @relation
           elsif self.class.kaminari?
             @relation.page(page).per(per_page)
           elsif self.class.will_paginate?
@@ -68,6 +70,8 @@ module Mincer
         def delegate_pagination(method)
           if self.respond_to?(:chewy_search_result) && self.chewy_search_result
             self.chewy_search_result.send(method)
+          elsif self.respond_to?(:elastic_search_result) && self.respond_to?(:"elastic_#{method}")
+            self.send(:"elastic_#{method}")
           else
             @relation.send(method)
           end

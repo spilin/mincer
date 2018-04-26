@@ -40,6 +40,7 @@ require 'mincer/processors/helpers'
 # Loading processors
 require 'mincer/processors/sorting/processor'
 require 'mincer/processors/chewy_search/processor'
+require 'mincer/processors/elastic_search/processor'
 require 'mincer/processors/pagination/processor'
 require 'mincer/processors/pg_search/search_statement'
 require 'mincer/processors/pg_search/sanitizer'

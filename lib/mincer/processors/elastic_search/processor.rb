@@ -20,7 +20,7 @@ module Mincer
             else
               elastic_search_query.search(elastic_search_query.payload)
             end
-            @mincer.elastic_total_pages = @mincer.elastic_search_result.response['hits']['total']
+            @mincer.elastic_total_pages = (@mincer.elastic_search_result.response['hits']['total'].to_f / @mincer.elastic_limit_value).ceil
             ids = (@mincer.elastic_search_result.response['hits'].try(:[], 'hits') || []).to_a.map { |e| e['_id'].to_i }
             table_name = @relation.class.respond_to?(:table_name) ? @relation.class.table_name : @relation.model.table_name
             @relation = @relation.where(id: ids).reorder("array_position(ARRAY#{ids}::integer[], #{table_name}.id)")

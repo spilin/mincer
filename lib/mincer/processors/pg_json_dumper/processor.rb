@@ -42,10 +42,14 @@ module Mincer
 
         # Query for basic json generation. Ex: [{'id': 1}, {...}]
         def basic_json_query(root = 'json', meta = false)
-          meta_sql = if meta
-            ", #{@mincer.total_pages} AS total_pages, #{@mincer.total_count} AS total_count, #{@mincer.current_page} AS current_page, #{@mincer.limit_value} AS per_page"
-          else
-            ''
+          meta_sql = ''
+          if meta
+            meta_sql << ", #{@mincer.total_pages} AS total_pages"
+            meta_sql << ", #{@mincer.total_count} AS total_count"
+            meta_sql << ", #{@mincer.current_page} AS current_page"
+            meta_sql << ", #{@mincer.limit_value} AS per_page"
+            meta_sql << ", '#{@mincer.sort_attribute}' AS sort_attribute"
+            meta_sql << ", '#{@mincer.sort_order}' AS sort_order"
           end
           <<-SQL
             SELECT COALESCE(array_to_json(array_agg(row_to_json(subq))), '[]') AS #{root} #{meta_sql}

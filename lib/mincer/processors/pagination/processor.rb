@@ -70,7 +70,7 @@ module Mincer
         def delegate_pagination(method)
           if self.respond_to?(:chewy_search_result) && self.chewy_search_result
             self.chewy_search_result.send(method)
-          elsif self.respond_to?(:elastic_search_result) && self.respond_to?(:"elastic_#{method}")
+          elsif self.respond_to?(:elastic_search_result) && self.elastic_search_result && self.respond_to?(:"elastic_#{method}")
             self.send(:"elastic_#{method}")
           else
             @relation.send(method)

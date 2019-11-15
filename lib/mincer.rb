@@ -1,6 +1,5 @@
 require 'ostruct'
 require 'mincer/version'
-require 'mincer/core_ext/string'
 require 'mincer/config'
 require 'mincer/base'
 

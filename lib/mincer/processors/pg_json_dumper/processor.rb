@@ -43,6 +43,9 @@ module Mincer
         # Query for basic json generation. Ex: [{'id': 1}, {...}]
         def basic_json_query(root = 'json', meta = false)
           meta_sql = if meta
+            if meta.is_a?(Hash) && meta[:total_count]
+              @mincer.relation.instance_variable_set(:@total_count, meta[:total_count])
+            end
             ", #{@mincer.total_pages} AS total_pages, #{@mincer.total_count} AS total_count, #{@mincer.current_page} AS current_page, #{@mincer.limit_value} AS per_page"
           else
             ''

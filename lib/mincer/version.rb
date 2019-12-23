@@ -1,7 +1,7 @@
 module Mincer
 
   def self.version
-    Gem::Version.new '0.2.17'
+    Gem::Version.new '0.2.18'
   end
 
   module VERSION #:nodoc:

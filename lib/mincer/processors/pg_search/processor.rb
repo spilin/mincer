@@ -142,7 +142,7 @@ module Mincer
           { ignore_accent: true, threshold: 0.3 }
         end
         config_accessor :array_engine do
-          { ignore_accent: true, any_word: true }
+          { ignore_accent: false, any_word: true }
         end
         config_accessor :engines do
           [Mincer::PgSearch::SearchEngines::Fulltext, Mincer::PgSearch::SearchEngines::Array, Mincer::PgSearch::SearchEngines::Trigram]

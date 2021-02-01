@@ -251,7 +251,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
 
     describe 'array_engine' do
       it 'sets "ignore_accent" to true as default value' do
-        Mincer.config.pg_search.array_engine[:ignore_accent].should be_true
+        Mincer.config.pg_search.array_engine[:ignore_accent].should be_false
       end
 
       it 'sets "any_word" to false as default value' do
@@ -264,7 +264,7 @@ describe ::Mincer::Processors::PgSearch::Processor do
             search.array_engine = search.array_engine.merge(any_word: false)
           end
         end
-        Mincer.config.pg_search.array_engine.should == { ignore_accent: true, any_word: false }
+        Mincer.config.pg_search.array_engine.should == { ignore_accent: false, any_word: false }
       end
     end
 

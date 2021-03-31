@@ -53,8 +53,11 @@ module Mincer
 
         def ts_query_for(search_statement)
           terms_delimiter = search_statement.options[:any_word] ? '|' : '&'
-          tsquery_sql = Arel.sql(search_statement.terms.map { |term| sanitize_string_quoted(term, search_statement.sanitizers(:query)).to_sql }.join(" || ' #{terms_delimiter} ' || "))
-          Arel::Nodes::NamedFunction.new('to_tsquery', [quote(search_statement.dictionary), tsquery_sql])
+          tsquery = search_statement.terms.map do |term|
+            _term = search_statement.options[:prefix_matching] ? "#{term}:*" : term
+            sanitize_string_quoted(_term, search_statement.sanitizers(:query)).to_sql
+          end.join(" || ' #{terms_delimiter} ' || ")
+          Arel::Nodes::NamedFunction.new('to_tsquery', [quote(search_statement.dictionary), Arel.sql(tsquery)])
         end
       end
 

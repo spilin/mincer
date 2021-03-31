@@ -218,7 +218,11 @@ If you set `ignore_case` attribute to true - search will ignore case.
 
     pg_search [{ :columns => %w{employees.full_name companies.name} }, :ignore_case => true ]
 
-Options like `unaccent`, `any_word`, `ignore_case` can be set to be used only on query or document. In Example if you use specific column that already has unaccented and lowercased text with GIN/GIST index and do not want to additionally use `unaccent` or `ignore_case` functions on that column(because this will cause index not to work) -you can disable those options. Ex.
+If you set `prefix_matching` attribute to true - lexemes in a tsquery can will be labeled with * to specify prefix matching.
+
+    pg_search [{ :columns => %w{employees.full_name companies.name} }, :prefix_matching => true ]
+
+Options like `unaccent`, `any_word`, `ignore_case`, `prefix_matching` can be set to be used only on query or document. In Example if you use specific column that already has unaccented and lowercased text with GIN/GIST index and do not want to additionally use `unaccent` or `ignore_case` functions on that column(because this will cause index not to work) -you can disable those options. Ex.
 
     pg_search [{ :columns => %w{employees.full_name} }, :ignore_case => {query: true} ]
 

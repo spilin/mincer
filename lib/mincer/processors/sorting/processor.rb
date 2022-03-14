@@ -7,19 +7,19 @@ module Mincer
         end
 
         def apply
-          sorting_sting = sort_string
-          if sorting_sting.present?
+          sorting_string = sort_string
+          if sorting_string.present?
             @mincer.sort_attribute = (sort_attr || default_sort).to_s
             @mincer.sort_order = (order_attr || default_order).to_s
             @mincer.default_sorting = sort_attr.blank? && order_attr.blank?
-            @relation.order(sorting_sting)
+            @relation.order(sorting_string)
           else
             @relation
           end
         end
 
         def sort_string
-          [(sort_attr || default_sort), (order_attr || default_order)].compact.uniq.join(' ')
+          Arel.sql([(sort_attr || default_sort), (order_attr || default_order)].compact.uniq.join(' '))
         end
 
         def sort_attr

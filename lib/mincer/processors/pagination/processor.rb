@@ -30,7 +30,7 @@ module Mincer
         end
 
         def per_page
-          @mincer.class.default_per_page || @args[::Mincer.config.pagination.per_page_param_name]
+          @args[::Mincer.config.pagination.per_page_param_name] || @mincer.class.default_per_page
         end
       end
 
